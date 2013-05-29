@@ -166,15 +166,31 @@ static void exynos_gem_dmabuf_kunmap(struct dma_buf *dma_buf,
 static int exynos_gem_dmabuf_mmap(struct dma_buf *dma_buf,
 	struct vm_area_struct *vma)
 {
-	struct exynos_drm_gem_obj *exynos_gem_obj = dma_buf_to_obj(dma_buf);
+	struct exynos_drm_gem_obj *exynos_gem_obj = dma_buf->priv;
 	struct exynos_drm_gem_buf *buffer = exynos_gem_obj->buffer;
-	struct drm_gem_object *obj = &exynos_gem_obj->base;
-	struct drm_device *drm_dev = obj->dev;
-	void *cookie = is_drm_iommu_supported(drm_dev) ?
-			buffer->pages : buffer->kvaddr;
+	unsigned long uaddr = vma->vm_start;
+	int ret;
 
-	return dma_mmap_attrs(drm_dev->dev, vma, cookie, buffer->dma_addr,
-			buffer->size, &buffer->dma_attrs);
+	if (exynos_gem_obj->flags & EXYNOS_BO_NONCONTIG) {
+		unsigned long i = 0;
+		struct scatterlist *sgl;
+
+		if (!buffer->sgt)
+			return -EINVAL;
+		sgl = buffer->sgt->sgl;
+
+		while (i < buffer->sgt->nents) {
+			ret = vm_insert_page(vma, uaddr, sg_page(sgl));
+			if (ret) {
+				DRM_ERROR("failed to remap user space.\n");
+				return ret;
+			}
+			sgl = sg_next(sgl);
+			uaddr += PAGE_SIZE;
+			i++;
+		}
+	}
+	return 0;
 }
 
 static struct dma_buf_ops exynos_dmabuf_ops = {
