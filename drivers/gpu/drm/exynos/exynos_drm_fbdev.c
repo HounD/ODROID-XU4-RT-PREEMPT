@@ -26,9 +26,8 @@
 #include "exynos_drm_iommu.h"
 
 #define IOCTL_GET_FB_DMA_BUF _IOWR('m',0xF9, __u32 )
-#define FBIOGET_DMABUF       _IOR('F', 0x21, struct fb_dmabuf_export)
-
-#define NUM_BUFFERS 1
+#include <linux/dma-buf.h>
+#define NUM_BUFFERS 3
 
 #define MAX_CONNECTOR		4
 #define PREFERRED_BPP		32
@@ -148,7 +147,7 @@ static int exynos_drm_fbdev_update(struct drm_fb_helper *helper,
 	unsigned long offset;
 
 	drm_fb_helper_fill_fix(fbi, fb->pitches[0], fb->depth);
-	drm_fb_helper_fill_var(fbi, helper, fb->width, fb->height / NUM_BUFFERS); 
+	drm_fb_helper_fill_var(fbi, helper, fb->width, fb->height / NUM_BUFFERS);
 
 	/* RGB formats use only one buffer */
 	buffer = exynos_drm_fb_buffer(fb, 0);
