@@ -906,7 +906,6 @@ static void fimd_unbind(struct device *dev, struct device *master,
 {
 	struct exynos_drm_manager *mgr = dev_get_drvdata(dev);
 	struct fimd_context *ctx = fimd_manager.ctx;
-	struct drm_crtc *crtc = mgr->crtc;
 
 	fimd_dpms(mgr, DRM_MODE_DPMS_OFF);
 
@@ -914,8 +913,6 @@ static void fimd_unbind(struct device *dev, struct device *master,
 		exynos_dpi_remove(dev);
 
 	fimd_mgr_remove(mgr);
-
-	crtc->funcs->destroy(crtc);
 }
 
 static const struct component_ops fimd_component_ops = {
