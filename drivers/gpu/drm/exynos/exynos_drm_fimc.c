@@ -464,7 +464,6 @@ static int fimc_src_set_fmt_order(struct fimc_context *ctx, u32 fmt)
 		cfg |= EXYNOS_MSCTRL_C_INT_IN_3PLANE;
 		break;
 	case DRM_FORMAT_NV12:
-	case DRM_FORMAT_NV12MT:
 	case DRM_FORMAT_NV16:
 		cfg |= (EXYNOS_MSCTRL_ORDER2P_LSB_CBCR |
 			EXYNOS_MSCTRL_C_INT_IN_2PLANE);
@@ -514,7 +513,6 @@ static int fimc_src_set_fmt(struct device *dev, u32 fmt)
 	case DRM_FORMAT_YVU420:
 	case DRM_FORMAT_NV12:
 	case DRM_FORMAT_NV21:
-	case DRM_FORMAT_NV12MT:
 		cfg |= EXYNOS_MSCTRL_INFORMAT_YCBCR420;
 		break;
 	default:
@@ -527,10 +525,7 @@ static int fimc_src_set_fmt(struct device *dev, u32 fmt)
 	cfg = fimc_read(ctx, EXYNOS_CIDMAPARAM);
 	cfg &= ~EXYNOS_CIDMAPARAM_R_MODE_MASK;
 
-	if (fmt == DRM_FORMAT_NV12MT)
-		cfg |= EXYNOS_CIDMAPARAM_R_MODE_64X32;
-	else
-		cfg |= EXYNOS_CIDMAPARAM_R_MODE_LINEAR;
+	cfg |= EXYNOS_CIDMAPARAM_R_MODE_LINEAR;
 
 	fimc_write(ctx, cfg, EXYNOS_CIDMAPARAM);
 
@@ -815,7 +810,6 @@ static int fimc_dst_set_fmt_order(struct fimc_context *ctx, u32 fmt)
 		cfg |= EXYNOS_CIOCTRL_YCBCR_3PLANE;
 		break;
 	case DRM_FORMAT_NV12:
-	case DRM_FORMAT_NV12MT:
 	case DRM_FORMAT_NV16:
 		cfg |= EXYNOS_CIOCTRL_ORDER2P_LSB_CBCR;
 		cfg |= EXYNOS_CIOCTRL_YCBCR_2PLANE;
@@ -870,7 +864,6 @@ static int fimc_dst_set_fmt(struct device *dev, u32 fmt)
 		case DRM_FORMAT_YUV420:
 		case DRM_FORMAT_YVU420:
 		case DRM_FORMAT_NV12:
-		case DRM_FORMAT_NV12MT:
 		case DRM_FORMAT_NV21:
 			cfg |= EXYNOS_CITRGFMT_OUTFORMAT_YCBCR420;
 			break;
@@ -886,10 +879,7 @@ static int fimc_dst_set_fmt(struct device *dev, u32 fmt)
 	cfg = fimc_read(ctx, EXYNOS_CIDMAPARAM);
 	cfg &= ~EXYNOS_CIDMAPARAM_W_MODE_MASK;
 
-	if (fmt == DRM_FORMAT_NV12MT)
-		cfg |= EXYNOS_CIDMAPARAM_W_MODE_64X32;
-	else
-		cfg |= EXYNOS_CIDMAPARAM_W_MODE_LINEAR;
+	cfg |= EXYNOS_CIDMAPARAM_W_MODE_LINEAR;
 
 	fimc_write(ctx, cfg, EXYNOS_CIDMAPARAM);
 
