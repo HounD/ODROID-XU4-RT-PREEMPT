@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm 3.10.63 Kernel Configuration
+# Linux/arm 3.10.72 Kernel Configuration
 #
 CONFIG_ARM=y
 CONFIG_ARM_HAS_SG_CHAIN=y
@@ -2816,7 +2816,7 @@ CONFIG_AC97_BUS=m
 #
 CONFIG_HID=y
 # CONFIG_HID_BATTERY_STRENGTH is not set
-# CONFIG_HIDRAW is not set
+CONFIG_HIDRAW=y
 # CONFIG_UHID is not set
 CONFIG_HID_GENERIC=y
 
