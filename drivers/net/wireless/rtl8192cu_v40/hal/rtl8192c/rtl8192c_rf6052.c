@@ -1010,21 +1010,7 @@ VOID
 PHY_RFShadowRefresh(
 	IN	PADAPTER			Adapter)
 {
-	u32		eRFPath;
-	u32		Offset;
-
-	for (eRFPath = 0; eRFPath < RF6052_MAX_PATH; eRFPath++)
-	{
-		for (Offset = 0; Offset <= RF6052_MAX_REG; Offset++)
-		{
-			RF_Shadow[eRFPath][Offset].Value = 0;
-			RF_Shadow[eRFPath][Offset].Compare = _FALSE;
-			RF_Shadow[eRFPath][Offset].Recorver  = _FALSE;
-			RF_Shadow[eRFPath][Offset].ErrorOrNot = _FALSE;
-			RF_Shadow[eRFPath][Offset].Driver_Write = _FALSE;
-		}
-	}
-	
+	memset(RF_Shadow, 0, sizeof(RF_Shadow));
 }	/* PHY_RFShadowRead */
 
 /* End of HalRf6052.c */
