@@ -562,6 +562,8 @@
 		samsung,audio-cpu-spdif = <&spdif>;	/* spdif */
 		samsung,audio-codec = <&audio_codec
 				       &audio_codec>;
+		samsung,audio-dummy = <&audio_codec_dummy
+				       &audio_codec_dummy>;
 		status = "okay";
 	};
 
