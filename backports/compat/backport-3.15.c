@@ -16,6 +16,7 @@
 #include <linux/mm.h>
 #include <linux/slab.h>
 #include <net/net_namespace.h>
+#include <linux/vmalloc.h>
 
 #if IS_ENABLED(CONFIG_BACKPORT_IEEE802154_6LOWPAN)
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0)
