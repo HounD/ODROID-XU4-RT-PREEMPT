@@ -323,6 +323,26 @@ static struct fbtft_device_display displays[] = {
 			}
 		}
 	}, {
+		.name = "odroid22",
+		.spi = &(struct spi_board_info) {
+			.modalias = "fb_ili9340",
+			.max_speed_hz = 32000000,
+			.mode = SPI_MODE_0,
+			.controller_data = &odroid32_controller_data,
+			.platform_data = &(struct fbtft_platform_data) {
+				.display = {
+					.buswidth = 8,
+					.backlight = 1,
+				},
+				.bgr = true,
+				.gpios = (const struct fbtft_gpio []) {
+					{ "reset", 21 },
+					{ "dc", 22},
+					{},
+				},
+			}
+		}
+	}, {
 		.name = "agm1264k-fl",
 		.pdev = &(struct platform_device) {
 			.name = "fb_agm1264k-fl",
