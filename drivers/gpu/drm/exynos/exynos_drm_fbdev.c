@@ -28,8 +28,6 @@
 #define IOCTL_GET_FB_DMA_BUF _IOWR('m',0xF9, __u32 )
 #define FBIOGET_DMABUF       _IOR('F', 0x21, struct fb_dmabuf_export)
 
-#include <linux/dma-buf.h>
-
 #define NUM_BUFFERS 3
 
 #define MAX_CONNECTOR		4
