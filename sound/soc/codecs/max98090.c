@@ -2164,7 +2164,7 @@ static struct snd_soc_dai_driver max98090_dai[] = {
 	.name = "HiFi",
 		.playback = {
 			.stream_name = "HiFi Playback",
-		.channels_min = 2,
+    		.channels_min = 1,
 			.channels_max = 2,
 			.rates = MAX98090_RATES,
 			.formats = MAX98090_FORMATS,
@@ -2177,7 +2177,7 @@ static struct snd_soc_dai_driver max98090_dai[] = {
 			.formats = MAX98090_FORMATS,
 		},
 	 .ops = &max98090_dai_ops,
-}
+    }
 };
 
 static void max98090_handle_pdata(struct snd_soc_codec *codec)
