@@ -505,8 +505,7 @@
 
 	spi_1: spi@12d30000 {
 	    status = "okay";
-        samsung,spi-src-clk = <0>;
-    };
+        };
 
 	spi_2: spi@12d40000 {
 		status = "disabled";
