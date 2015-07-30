@@ -323,7 +323,7 @@ static struct fbtft_device_display displays[] = {
 			}
 		}
 	}, {
-		.name = "odroid22",
+		.name = "hktft9340",
 		.spi = &(struct spi_board_info) {
 			.modalias = "fb_ili9340",
 			.max_speed_hz = 32000000,
