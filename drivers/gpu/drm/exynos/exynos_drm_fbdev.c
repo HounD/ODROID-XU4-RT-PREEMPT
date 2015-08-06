@@ -28,7 +28,7 @@
 #define IOCTL_GET_FB_DMA_BUF _IOWR('m',0xF9, __u32 )
 #define FBIOGET_DMABUF       _IOR('F', 0x21, struct fb_dmabuf_export)
 
-#define NUM_BUFFERS 3
+#define NUM_BUFFERS 1
 
 #define MAX_CONNECTOR		4
 #define PREFERRED_BPP		32
