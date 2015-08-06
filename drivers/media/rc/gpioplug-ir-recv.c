@@ -51,7 +51,7 @@ static int __init gpio_init(void)
 	if (!pdev)
 		return rc;
 
-	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+	pdata = kzalloc(sizeof(*pdata), GFP_KERNEL);
 	if (!pdata)
 		goto err_free_platform_data;
 
