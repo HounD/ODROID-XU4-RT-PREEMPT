@@ -218,6 +218,26 @@ struct hdmiphy_config {
 	u8 conf[32];
 };
 
+#if defined(CONFIG_MACH_ODROIDXU3)
+//-----------------------------------------------------------------------------
+//
+//  HPD Signal Disable control.
+//
+//  Default gEnableHPD = true,
+//
+//-----------------------------------------------------------------------------
+unsigned int    gEnableHPD = true;  // Default setup
+
+static int __init hdmi_hpd_enable(char *line)
+{
+    if(kstrtoul(line, 10, &gEnableHPD) != 0)    gEnableHPD = true;
+    else                                        gEnableHPD = false;
+
+    return  0;
+}
+__setup("HPD=", hdmi_hpd_enable);
+
+#endif  // #if defined(CONFIG_MACH_ODROIDXU3)
 //-----------------------------------------------------------------------------
 #if defined(CONFIG_ODROID_EXYNOS5_HDMI_PHY_TUNE)
 
@@ -1278,7 +1298,14 @@ static enum drm_connector_status hdmi_detect(struct drm_connector *connector,
 {
 	struct hdmi_context *hdata = ctx_from_connector(connector);
 
-	hdata->hpd = gpio_get_value(hdata->hpd_gpio);
+#if defined(CONFIG_MACH_ODROIDXU3)
+    if(gEnableHPD)
+        hdata->hpd = gpio_get_value(hdata->hpd_gpio);
+    else
+        hdata->hpd = true;
+#else
+    hdata->hpd = gpio_get_value(hdata->hpd_gpio);
+#endif
 
 	return hdata->hpd ? connector_status_connected :
 			connector_status_disconnected;
