@@ -716,10 +716,7 @@ static int gsc_src_set_addr(struct device *dev,
 	DRM_DEBUG_KMS("prop_id[%d]buf_id[%d]buf_type[%d]\n",
 		property->prop_id, buf_id, buf_type);
 
-	if (buf_id > GSC_MAX_SRC) {
-		dev_info(ippdrv->dev, "inavlid buf_id %d.\n", buf_id);
-		return -EINVAL;
-	}
+	buf_id %= GSC_MAX_SRC;
 
 	/* address register set */
 	switch (buf_type) {
@@ -1167,10 +1164,7 @@ static int gsc_dst_set_addr(struct device *dev,
 	DRM_DEBUG_KMS("prop_id[%d]buf_id[%d]buf_type[%d]\n",
 		property->prop_id, buf_id, buf_type);
 
-	if (buf_id > GSC_MAX_DST) {
-		dev_info(ippdrv->dev, "inavlid buf_id %d.\n", buf_id);
-		return -EINVAL;
-	}
+	buf_id %= GSC_MAX_DST;
 
 	/* address register set */
 	switch (buf_type) {
