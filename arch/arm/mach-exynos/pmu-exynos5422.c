@@ -557,6 +557,7 @@ void exynos_pmu_wdt_control(bool on, unsigned int pmu_wdt_reset_type)
 
 	return;
 }
+EXPORT_SYMBOL(exynos_pmu_wdt_control);
 
 void exynos_sys_powerdown_conf(enum sys_powerdown mode)
 {
