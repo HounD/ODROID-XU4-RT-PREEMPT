@@ -1537,9 +1537,11 @@ static int s3c64xx_spi_remove(struct platform_device *pdev)
 
 	writel(0, sdd->regs + S3C64XX_SPI_INT_EN);
 
+#ifndef CONFIG_PM_RUNTIME
 	clk_disable_unprepare(sdd->src_clk);
 
 	clk_disable_unprepare(sdd->clk);
+#endif
 
 	platform_set_drvdata(pdev, NULL);
 	spi_master_put(master);

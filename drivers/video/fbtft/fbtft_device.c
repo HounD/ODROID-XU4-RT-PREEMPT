@@ -1475,6 +1475,10 @@ static void __exit fbtft_device_exit(void)
 	pr_debug(DRVNAME" - exit\n");
 
 	if (spi_device) {
+        if(spi_device->controller_data)    {
+            struct s3c64xx_spi_csinfo *cs = spi_device->controller_data;
+            if(cs->line)    gpio_free(cs->line);
+        }
 		device_del(&spi_device->dev);
 		kfree(spi_device);
 	}
