@@ -577,9 +577,9 @@
 
 		fan_mode = <1>; 			/* 0:manual, 1:auto */
 
-		tmu_level_0 = <57>;
-		tmu_level_1 = <63>;
-		tmu_level_2 = <68>;
+		tmu_level_0 = <68>;
+		tmu_level_1 = <73>;
+		tmu_level_2 = <85>;
 
 		fan_speed_0 = <1>;
 		fan_speed_1 = <51>;
