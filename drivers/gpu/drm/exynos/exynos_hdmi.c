@@ -226,7 +226,7 @@ struct hdmiphy_config {
 //  Default gEnableHPD = true,
 //
 //-----------------------------------------------------------------------------
-unsigned int    gEnableHPD = true;  // Default setup
+unsigned long    gEnableHPD = true;  // Default setup
 
 static int __init hdmi_hpd_enable(char *line)
 {
@@ -1757,7 +1757,9 @@ static void hdmi_v13_mode_apply(struct hdmi_context *hdata)
 	}
 
 	clk_disable_unprepare(hdata->res.sclk_hdmi);
-	// clk_set_parent(hdata->res.mout_hdmi, hdata->res.sclk_hdmiphy);
+#ifndef CONFIG_MACH_ODROIDXU3
+	clk_set_parent(hdata->res.mout_hdmi, hdata->res.sclk_hdmiphy);
+#endif
 	clk_prepare_enable(hdata->res.sclk_hdmi);
 
 	/* enable HDMI and timing generator */
@@ -1919,7 +1921,9 @@ static void hdmi_v14_mode_apply(struct hdmi_context *hdata)
 	}
 
 	clk_disable_unprepare(hdata->res.sclk_hdmi);
-	// clk_set_parent(hdata->res.mout_hdmi, hdata->res.sclk_hdmiphy);
+#ifndef CONFIG_MACH_ODROIDXU3
+	clk_set_parent(hdata->res.mout_hdmi, hdata->res.sclk_hdmiphy);
+#endif
 	clk_prepare_enable(hdata->res.sclk_hdmi);
 
 	/* enable HDMI and timing generator */
@@ -1940,7 +1944,9 @@ static void hdmiphy_conf_reset(struct hdmi_context *hdata)
 	u32 reg;
 
 	clk_disable_unprepare(hdata->res.sclk_hdmi);
-	// clk_set_parent(hdata->res.mout_hdmi, hdata->res.sclk_pixel);
+#ifndef CONFIG_ODROIDXU3
+	clk_set_parent(hdata->res.mout_hdmi, hdata->res.sclk_pixel);
+#endif
 	clk_prepare_enable(hdata->res.sclk_hdmi);
 
 	/* operation mode */
@@ -1982,6 +1988,7 @@ static void hdmiphy_poweron(struct hdmi_context *hdata)
 	hdmiphy_conf_reset(hdata);
 }
 
+#ifndef CONFIG_MACH_ODROIDXU3
 static void hdmiphy_poweroff(struct hdmi_context *hdata)
 {
 	if (hdata->type != HDMI_TYPE14)
@@ -2003,6 +2010,7 @@ static void hdmiphy_poweroff(struct hdmi_context *hdata)
 	hdmiphy_reg_writeb(hdata, HDMIPHY_MODE_SET_DONE,
 				HDMI_PHY_DISABLE_MODE_SET);
 }
+#endif
 
 static void hdmiphy_conf_apply(struct hdmi_context *hdata)
 {
@@ -2349,12 +2357,16 @@ static void hdmi_poweroff(struct exynos_drm_display *display)
 	/* HDMI System Disable */
 	hdmi_reg_writemask(hdata, HDMI_CON_0, 0, HDMI_EN);
 
-	// hdmiphy_poweroff(hdata);
+#ifndef CONFIG_MACH_ODROIDXU3
+	hdmiphy_poweroff(hdata);
+#endif
 
 	cancel_delayed_work(&hdata->hotplug_work);
 
-	// clk_disable_unprepare(res->sclk_hdmi);
-	// clk_disable_unprepare(res->hdmi);
+#ifndef CONFIG_MACH_ODROIDXU3
+	clk_disable_unprepare(res->sclk_hdmi);
+	clk_disable_unprepare(res->hdmi);
+#endif
 
 	/* reset pmu hdmiphy control bit to disable hdmiphy */
 	regmap_update_bits(hdata->pmureg, PMU_HDMI_PHY_CONTROL,
@@ -2473,7 +2485,9 @@ static int hdmi_resources_init(struct hdmi_context *hdata)
 		goto fail;
 	}
 
-	// clk_set_parent(res->mout_hdmi, res->sclk_pixel);
+#ifndef CONFIG_MACH_ODROIDXU3
+	clk_set_parent(res->mout_hdmi, res->sclk_pixel);
+#endif
 	clk_set_parent(res->sclk_hdmi, res->sclk_hdmiphy);
 
 	res->regul_bulk = devm_kzalloc(dev, ARRAY_SIZE(supply) *
