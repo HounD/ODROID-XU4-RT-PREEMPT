@@ -54,7 +54,6 @@ EXPORT_SYMBOL_GPL(fs_kobj);
  * tree or hash is modified or when a vfsmount structure is modified.
  */
 DEFINE_BRLOCK(vfsmount_lock);
-EXPORT_SYMBOL(vfsmount_lock);
 
 static inline unsigned long hash(struct vfsmount *mnt, struct dentry *dentry)
 {
