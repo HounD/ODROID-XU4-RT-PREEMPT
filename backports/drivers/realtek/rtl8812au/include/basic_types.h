@@ -76,7 +76,7 @@
 
 
 #ifdef PLATFORM_LINUX
-	#include <linux/version.h>
+
 	#include <linux/types.h>
 	#define IN
 	#define OUT
@@ -95,10 +95,6 @@
 	#define USHORT u16
 	#define UINT u32
 	#define ULONG u32	
-
-	#if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19))
-		typedef _Bool bool;
-	#endif
 
 	typedef void (*proc_t)(void*);
 
@@ -272,7 +268,7 @@
 	( \
 		LE_P2BYTE_TO_HOST_2BYTE(__pStart) \
 		& \
-		(u16)(~BIT_OFFSET_LEN_MASK_16(__BitOffset, __BitLen))\
+		( ~BIT_OFFSET_LEN_MASK_16(__BitOffset, __BitLen) ) \
 	)
 
 #define SET_BITS_TO_LE_2BYTE(__pStart, __BitOffset, __BitLen, __Value) \
@@ -303,7 +299,7 @@
 	( \
 		LE_P1BYTE_TO_HOST_1BYTE(__pStart) \
 		& \
-		(u8)(~BIT_OFFSET_LEN_MASK_8(__BitOffset, __BitLen))\
+		( ~BIT_OFFSET_LEN_MASK_8(__BitOffset, __BitLen) ) \
 	)
 
 #define SET_BITS_TO_LE_1BYTE(__pStart, __BitOffset, __BitLen, __Value) \
@@ -314,32 +310,20 @@
 			( (((u8)__Value) & BIT_LEN_MASK_8(__BitLen)) << (__BitOffset) ) \
 		);
 
-
-#define LE_BITS_CLEARED_TO_2BYTE_16BIT(__pStart, __BitOffset, __BitLen) \
-	( \
-		LE_P2BYTE_TO_HOST_2BYTE(__pStart) \
-	)
-
-#define SET_BITS_TO_LE_2BYTE_16BIT(__pStart, __BitOffset, __BitLen, __Value) \
-	*((u16 *)(__pStart)) = \
-		EF2Byte( \
-			LE_BITS_CLEARED_TO_2BYTE_16BIT(__pStart, __BitOffset, __BitLen) \
-			| \
-			( (u16)__Value) \
-		);
-
+//pclint
 #define LE_BITS_CLEARED_TO_1BYTE_8BIT(__pStart, __BitOffset, __BitLen) \
 	( \
 		LE_P1BYTE_TO_HOST_1BYTE(__pStart) \
 	)
 
+//pclint
 #define SET_BITS_TO_LE_1BYTE_8BIT(__pStart, __BitOffset, __BitLen, __Value) \
 { \
-	*((u8 *)(__pStart)) = \
+	*((pu1Byte)(__pStart)) = \
 		EF1Byte( \
 			LE_BITS_CLEARED_TO_1BYTE_8BIT(__pStart, __BitOffset, __BitLen) \
 			| \
-			((u8)__Value) \
+			((u1Byte)__Value) \
 		); \
 }
 

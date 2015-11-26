@@ -15,10 +15,6 @@
 
 #define		BTC_RSSI_COEX_THRESH_TOL_8723B_2ANT		2
 
-
-#define	BT_8723B_2ANT_WIFI_RSSI_COEXSWITCH_THRES				42  //WiFi RSSI Threshold for 2-Ant TDMA/1-Ant PS-TDMA translation
-#define	BT_8723B_2ANT_BT_RSSI_COEXSWITCH_THRES				46 //BT RSSI Threshold for 2-Ant TDMA/1-Ant PS-TDMA translation
-
 typedef enum _BT_INFO_SRC_8723B_2ANT{
 	BT_INFO_SRC_8723B_2ANT_WIFI_FW			= 0x0,
 	BT_INFO_SRC_8723B_2ANT_BT_RSP				= 0x1,
@@ -53,8 +49,8 @@ typedef enum _BT_8723B_2ANT_COEX_ALGO{
 
 typedef struct _COEX_DM_8723B_2ANT{
 	// fw mechanism
-	u1Byte		preBtDecPwrLvl;
-	u1Byte		curBtDecPwrLvl;
+	BOOLEAN		bPreDecBtPwr;
+	BOOLEAN		bCurDecBtPwr;
 	u1Byte		preFwDacSwingLvl;
 	u1Byte		curFwDacSwingLvl;
 	BOOLEAN		bCurIgnoreWlanAct;
@@ -101,12 +97,7 @@ typedef struct _COEX_DM_8723B_2ANT{
 	u1Byte		wifiChnlInfo[3];
 
 	BOOLEAN		bNeedRecover0x948;
-	u4Byte		backup0x948;
-
-	u1Byte		preLps;
-	u1Byte		curLps;
-	u1Byte		preRpwm;
-	u1Byte		curRpwm;
+	u2Byte		backup0x948;
 } COEX_DM_8723B_2ANT, *PCOEX_DM_8723B_2ANT;
 
 typedef struct _COEX_STA_8723B_2ANT{	
@@ -123,48 +114,22 @@ typedef struct _COEX_STA_8723B_2ANT{
 	u4Byte					lowPriorityTx;
 	u4Byte					lowPriorityRx;
 	u1Byte					btRssi;
-	BOOLEAN				bBtTxRxMask;
 	u1Byte					preBtRssiState;
 	u1Byte					preWifiRssiState[4];
 	BOOLEAN					bC2hBtInfoReqSent;
 	u1Byte					btInfoC2h[BT_INFO_SRC_8723B_2ANT_MAX][10];
 	u4Byte					btInfoC2hCnt[BT_INFO_SRC_8723B_2ANT_MAX];
-	BOOLEAN 				bBtWhckTest;
 	BOOLEAN					bC2hBtInquiryPage;
 	u1Byte					btRetryCnt;
 	u1Byte					btInfoExt;
-
-	u4Byte					nCRCOK_CCK;
-	u4Byte					nCRCOK_11g;
-	u4Byte					nCRCOK_11n;
-	u4Byte					nCRCOK_11nAgg;
-	
-	u4Byte					nCRCErr_CCK;
-	u4Byte					nCRCErr_11g;
-	u4Byte					nCRCErr_11n;
-	u4Byte					nCRCErr_11nAgg;
-
-	u1Byte					nCoexTableType;
-	BOOLEAN					bForceLpsOn;
-
-	u1Byte					disVerInfoCnt;
 }COEX_STA_8723B_2ANT, *PCOEX_STA_8723B_2ANT;
 
 //===========================================
 // The following is interface which will notify coex module.
 //===========================================
 VOID
-EXhalbtc8723b2ant_PowerOnSetting(
-	IN	PBTC_COEXIST		pBtCoexist
-	);
-VOID
-EXhalbtc8723b2ant_PreLoadFirmware(
-	IN	PBTC_COEXIST		pBtCoexist
-	);
-VOID
 EXhalbtc8723b2ant_InitHwConfig(
-	IN	PBTC_COEXIST		pBtCoexist,
-	IN	BOOLEAN				bWifiOnly
+	IN	PBTC_COEXIST		pBtCoexist
 	);
 VOID
 EXhalbtc8723b2ant_InitCoexDm(
@@ -209,11 +174,6 @@ EXhalbtc8723b2ant_BtInfoNotify(
 VOID
 EXhalbtc8723b2ant_HaltNotify(
 	IN	PBTC_COEXIST			pBtCoexist
-	);
-VOID
-EXhalbtc8723b2ant_PnpNotify(
-	IN	PBTC_COEXIST			pBtCoexist,
-	IN	u1Byte				pnpState
 	);
 VOID
 EXhalbtc8723b2ant_Periodical(

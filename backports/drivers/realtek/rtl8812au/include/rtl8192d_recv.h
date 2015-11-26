@@ -27,7 +27,6 @@
 
 #if defined(CONFIG_USB_HCI)
 
-#ifndef MAX_RECVBUF_SZ
 #ifdef PLATFORM_OS_CE
 #define MAX_RECVBUF_SZ (8192+1024) // 8K+1k
 #else
@@ -44,7 +43,6 @@
 		#define MAX_RECVBUF_SZ (4000) // about 4K
 	#endif
 #endif
-#endif //!MAX_RECVBUF_SZ
 
 #elif defined(CONFIG_PCI_HCI)
 //#ifndef CONFIG_MINIMAL_MEMORY_USAGE
@@ -54,6 +52,25 @@
 //#endif
 
 #endif
+
+struct phy_stat
+{
+	unsigned int phydw0;
+
+	unsigned int phydw1;
+
+	unsigned int phydw2;
+
+	unsigned int phydw3;
+
+	unsigned int phydw4;
+
+	unsigned int phydw5;
+
+	unsigned int phydw6;
+
+	unsigned int phydw7;
+};
 
 // Rx smooth factor
 #define	Rx_Smooth_Factor (20)
@@ -79,7 +96,8 @@ int	rtl8192de_init_recv_priv(_adapter * padapter);
 void rtl8192de_free_recv_priv(_adapter * padapter);
 #endif
 
+void rtl8192d_translate_rx_signal_stuff(union recv_frame *precvframe, struct phy_stat *pphy_status);
 void rtl8192d_query_rx_desc_status(union recv_frame *precvframe, struct recv_stat *pdesc);
 
-#endif /* _RTL8192D_RECV_H_ */
+#endif
 

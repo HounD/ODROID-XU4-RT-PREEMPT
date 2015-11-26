@@ -285,40 +285,38 @@ _func_enter_;
 	if(authmode==_WPA_IE_ID_)
 	{
 		RT_TRACE(_module_mlme_osdep_c_,_drv_info_,("rtw_report_sec_ie, authmode=%d\n", authmode));
-
-		buff = rtw_zmalloc(IW_CUSTOM_MAX);
-		if (NULL == buff) {
-			DBG_871X(FUNC_ADPT_FMT ": alloc memory FAIL!!\n",
-				FUNC_ADPT_ARG(adapter));
-			return;
-		}
-		p = buff;
-
+		
+		buff = rtw_malloc(IW_CUSTOM_MAX);
+		
+		_rtw_memset(buff,0,IW_CUSTOM_MAX);
+		
+		p=buff;
+		
 		p+=sprintf(p,"ASSOCINFO(ReqIEs=");
 
 		len = sec_ie[1]+2;
-		len = (len < IW_CUSTOM_MAX) ? len:IW_CUSTOM_MAX;
+		len =  (len < IW_CUSTOM_MAX) ? len:IW_CUSTOM_MAX;
 			
 		for(i=0;i<len;i++){
 			p+=sprintf(p,"%02x",sec_ie[i]);
 		}
 
 		p+=sprintf(p,")");
-
+		
 		_rtw_memset(&wrqu,0,sizeof(wrqu));
-
+		
 		wrqu.data.length=p-buff;
-
+		
 		wrqu.data.length = (wrqu.data.length<IW_CUSTOM_MAX) ? wrqu.data.length:IW_CUSTOM_MAX;
-
+		
 #ifndef CONFIG_IOCTL_CFG80211
 		wireless_send_event(adapter->pnetdev,IWEVCUSTOM,&wrqu,buff);
 #endif
 
-		rtw_mfree(buff, IW_CUSTOM_MAX);
+		if(buff)
+		    rtw_mfree(buff, IW_CUSTOM_MAX);
+		
 	}
-
-exit:
 
 _func_exit_;
 
@@ -464,7 +462,11 @@ static int mgnt_netdev_open(struct net_device *pnetdev)
 
 	init_usb_anchor(&phostapdpriv->anchored);
 	
-	rtw_netif_wake_queue(pnetdev);
+	if(!rtw_netif_queue_stopped(pnetdev))
+		rtw_netif_start_queue(pnetdev);
+	else
+		rtw_netif_wake_queue(pnetdev);
+
 
 	netif_carrier_on(pnetdev);
 		
@@ -482,8 +484,9 @@ static int mgnt_netdev_close(struct net_device *pnetdev)
 
 	netif_carrier_off(pnetdev);
 
-	rtw_netif_stop_queue(pnetdev);
-
+	if (!rtw_netif_queue_stopped(pnetdev))
+		rtw_netif_stop_queue(pnetdev);
+	
 	//rtw_write16(phostapdpriv->padapter, 0x0116, 0x3f3f);
 	
 	return 0;	

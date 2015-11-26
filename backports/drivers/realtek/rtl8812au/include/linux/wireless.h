@@ -35,13 +35,7 @@
 #endif
 
 /****************************** TYPES ******************************/
-#ifdef CONFIG_COMPAT
-struct compat_iw_point {
-         compat_caddr_t pointer;
-         __u16 length;
-         __u16 flags;
-};
-#endif
+
 /* --------------------------- SUBTYPES --------------------------- */
 /*
  *	For all data larger than 16 octets, we need to use a

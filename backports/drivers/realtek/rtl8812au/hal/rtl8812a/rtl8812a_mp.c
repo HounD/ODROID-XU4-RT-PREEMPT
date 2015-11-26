@@ -261,13 +261,10 @@ void Hal_MPT_CCKTxPowerAdjustbyIndex(PADAPTER pAdapter, BOOLEAN beven)
 			}
 		}
 
-		if (Action == 1) {
-			if (CCK_index_old == 0)
-				CCK_index_old = 1;
+		if (Action == 1)
 			CCK_index = CCK_index_old - 1;
-		} else {
+		else
 			CCK_index = CCK_index_old + 1;
-		}
 
 		if (CCK_index == CCK_TABLE_SIZE) {
 			CCK_index = CCK_TABLE_SIZE -1;
@@ -330,12 +327,21 @@ void Hal_SetChannel(PADAPTER pAdapter)
 	
 	u8		channel = pmp->channel;
 	u8		bandwidth = pmp->bandwidth;
-	
-	pHalData->bSwChnl = _TRUE;
-	//SelectChannel(pAdapter, channel);
-	PHY_SwChnl8812(pAdapter, channel);
-	//PHY_HandleSwChnlAndSetBW8812(pAdapter, _TRUE, _FALSE, channel, bandwidth, 0, 0, channel);	
-	//set_channel_bwmode(pAdapter, pAdapter->mppriv.channel, HAL_PRIME_CHNL_OFFSET_DONT_CARE, pAdapter->mppriv.bandwidth);
+	u8		rate = pmp->rateidx;
+
+
+	// set RF channel register
+	for (eRFPath = 0; eRFPath < pHalData->NumTotalRFPath; eRFPath++)
+	{
+      		if(IS_HARDWARE_TYPE_8192D(pAdapter))
+			_write_rfreg(pAdapter, eRFPath, ODM_CHANNEL, 0xFF, channel);
+		else
+			_write_rfreg(pAdapter, eRFPath, ODM_CHANNEL, 0x3FF, channel);
+	}
+	//Hal_mpt_SwitchRfSetting(pAdapter);
+
+	SelectChannel(pAdapter, channel);
+
 	if (pHalData->CurrentChannel == 14 && !pDM_Odm->RFCalibrateInfo.bCCKinCH14) {
 		pDM_Odm->RFCalibrateInfo.bCCKinCH14 = _TRUE;
 		Hal_MPT_CCKTxPowerAdjust(pAdapter, pDM_Odm->RFCalibrateInfo.bCCKinCH14);
@@ -355,15 +361,10 @@ void Hal_SetChannel(PADAPTER pAdapter)
 void Hal_SetBandwidth(PADAPTER pAdapter)
 {
 	struct mp_priv *pmp = &pAdapter->mppriv;
-	HAL_DATA_TYPE	*pHalData = GET_HAL_DATA(pAdapter);
 
-	u8		channel = pmp->channel;
-	u8		bandwidth = pmp->bandwidth;
 
-	pHalData->bSetChnlBW=_TRUE;
-
-	PHY_SetSwChnlBWMode8812(pAdapter, channel, bandwidth, 0, 0 );
-	//SetBWMode(pAdapter, pmp->bandwidth, pmp->prime_channel_offset);
+	SetBWMode(pAdapter, pmp->bandwidth, pmp->prime_channel_offset);
+	//Hal_mpt_SwitchRfSetting(pAdapter);
 }
 
 void Hal_SetCCKTxPower(PADAPTER pAdapter, u8 *TxPower)
@@ -374,12 +375,12 @@ void Hal_SetCCKTxPower(PADAPTER pAdapter, u8 *TxPower)
 	// rf-A cck tx power
 	write_bbreg(pAdapter, rTxAGC_A_CCK1_Mcs32, bMaskByte1, TxPower[RF_PATH_A]);
 	tmpval = (TxPower[RF_PATH_A]<<16) | (TxPower[RF_PATH_A]<<8) | TxPower[RF_PATH_A];
-	write_bbreg(pAdapter, rTxAGC_B_CCK11_A_CCK2_11, bMaskH3Bytes, tmpval);
+	write_bbreg(pAdapter, rTxAGC_B_CCK11_A_CCK2_11, 0xffffff00, tmpval);
 
 	// rf-B cck tx power
 	write_bbreg(pAdapter, rTxAGC_B_CCK11_A_CCK2_11, bMaskByte0, TxPower[RF_PATH_B]);
 	tmpval = (TxPower[RF_PATH_B]<<16) | (TxPower[RF_PATH_B]<<8) | TxPower[RF_PATH_B];
-	write_bbreg(pAdapter, rTxAGC_B_CCK1_55_Mcs32, bMaskH3Bytes, tmpval);
+	write_bbreg(pAdapter, rTxAGC_B_CCK1_55_Mcs32, 0xffffff00, tmpval);
 
 	RT_TRACE(_module_mp_, _drv_notice_,
 		 ("-SetCCKTxPower: A[0x%02x] B[0x%02x]\n",
@@ -710,7 +711,7 @@ s32 Hal_SetThermalMeter(PADAPTER pAdapter, u8 target_ther)
 
 void Hal_TriggerRFThermalMeter(PADAPTER pAdapter)
 {
-	PHY_SetRFReg(pAdapter, ODM_RF_PATH_A, RF_T_METER_8812A, BIT17 | BIT16, 0x03);
+	_write_rfreg( pAdapter, RF_PATH_A , RF_T_METER_8812A , BIT17 |BIT16 , 0x03 );
 
 //	RT_TRACE(_module_mp_,_drv_alert_, ("TriggerRFThermalMeter() finished.\n" ));
 }
@@ -808,13 +809,13 @@ void Hal_SetSingleToneTx(PADAPTER pAdapter, u8 bStart)
 	{
 		case ANTENNA_A:
 		default:
-			pMptCtx->MptRfPath = rfPath = RF_PATH_A;
+			rfPath = RF_PATH_A;
 			break;
 		case ANTENNA_B:
-			pMptCtx->MptRfPath = rfPath = RF_PATH_B;
+			rfPath = RF_PATH_B;
 			break;
 		case ANTENNA_C:
-			pMptCtx->MptRfPath = rfPath = RF_PATH_C;
+			rfPath = RF_PATH_C;
 			break;
 	}
 
@@ -823,7 +824,7 @@ void Hal_SetSingleToneTx(PADAPTER pAdapter, u8 bStart)
 	{
 		if (IS_HARDWARE_TYPE_JAGUAR(pAdapter)) 
 		{
-			u1Byte p = ODM_RF_PATH_A;
+		u1Byte p = ODM_RF_PATH_A;
 
 			regRF0x0 = PHY_QueryRFReg(pAdapter, ODM_RF_PATH_A, RF_AC_Jaguar, bRFRegOffsetMask);
 			reg0xCB0 = PHY_QueryBBReg(pAdapter, rA_RFE_Pinmux_Jaguar, bMaskDWord);

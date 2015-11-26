@@ -21,85 +21,6 @@
 
 #include <drv_types.h>
 
-static const char *_security_type_str[] = {
-	"N/A",
-	"WEP40",
-	"TKIP",
-	"TKIP_WM",
-	"AES",
-	"WEP104",
-	"SMS4",
-	"WEP_WPA",
-	"BIP",
-};
-
-const char *security_type_str(u8 value)
-{
-#ifdef CONFIG_IEEE80211W
-	if (value <= _BIP_)
-#else
-	if (value <= _WEP_WPA_MIXED_)
-#endif
-		return _security_type_str[value];
-	return NULL;
-}
-
-#ifdef DBG_SW_SEC_CNT
-#define WEP_SW_ENC_CNT_INC(sec, ra) \
-	if (is_broadcast_mac_addr(ra)) \
-		sec->wep_sw_enc_cnt_bc++; \
-	else if (is_multicast_mac_addr(ra)) \
-		sec->wep_sw_enc_cnt_mc++; \
-	else \
-		sec->wep_sw_enc_cnt_uc++;
-
-#define WEP_SW_DEC_CNT_INC(sec, ra) \
-	if (is_broadcast_mac_addr(ra)) \
-		sec->wep_sw_dec_cnt_bc++; \
-	else if (is_multicast_mac_addr(ra)) \
-		sec->wep_sw_dec_cnt_mc++; \
-	else \
-		sec->wep_sw_dec_cnt_uc++;
-
-#define TKIP_SW_ENC_CNT_INC(sec, ra) \
-	if (is_broadcast_mac_addr(ra)) \
-		sec->tkip_sw_enc_cnt_bc++; \
-	else if (is_multicast_mac_addr(ra)) \
-		sec->tkip_sw_enc_cnt_mc++; \
-	else \
-		sec->tkip_sw_enc_cnt_uc++;
-
-#define TKIP_SW_DEC_CNT_INC(sec, ra) \
-	if (is_broadcast_mac_addr(ra)) \
-		sec->tkip_sw_dec_cnt_bc++; \
-	else if (is_multicast_mac_addr(ra)) \
-		sec->tkip_sw_dec_cnt_mc++; \
-	else \
-		sec->tkip_sw_dec_cnt_uc++;
-
-#define AES_SW_ENC_CNT_INC(sec, ra) \
-	if (is_broadcast_mac_addr(ra)) \
-		sec->aes_sw_enc_cnt_bc++; \
-	else if (is_multicast_mac_addr(ra)) \
-		sec->aes_sw_enc_cnt_mc++; \
-	else \
-		sec->aes_sw_enc_cnt_uc++;
-
-#define AES_SW_DEC_CNT_INC(sec, ra) \
-	if (is_broadcast_mac_addr(ra)) \
-		sec->aes_sw_dec_cnt_bc++; \
-	else if (is_multicast_mac_addr(ra)) \
-		sec->aes_sw_dec_cnt_mc++; \
-	else \
-		sec->aes_sw_dec_cnt_uc++;
-#else
-#define WEP_SW_ENC_CNT_INC(sec, ra)
-#define WEP_SW_DEC_CNT_INC(sec, ra)
-#define TKIP_SW_ENC_CNT_INC(sec, ra)
-#define TKIP_SW_DEC_CNT_INC(sec, ra)
-#define AES_SW_ENC_CNT_INC(sec, ra)
-#define AES_SW_DEC_CNT_INC(sec, ra)
-#endif /* DBG_SW_SEC_CNT */
 
 //=====WEP related===== 
 
@@ -308,8 +229,7 @@ _func_enter_;
 			}
 			
 		}		
-
-		WEP_SW_ENC_CNT_INC(psecuritypriv, pattrib->ra);
+						
 	}
 	
 _func_exit_;						
@@ -357,9 +277,8 @@ _func_enter_;
 		{
 			RT_TRACE(_module_rtl871x_security_c_,_drv_err_,("rtw_wep_decrypt:icv error crc[3](%x)!=payload[length-1](%x) || crc[2](%x)!=payload[length-2](%x) || crc[1](%x)!=payload[length-3](%x) || crc[0](%x)!=payload[length-4](%x)\n",
 						crc[3],payload[length-1],crc[2],payload[length-2],crc[1],payload[length-3],crc[0],payload[length-4]));
-		}
-
-		WEP_SW_DEC_CNT_INC(psecuritypriv, prxattrib->ra);
+		}	
+						
 	}
 	
 _func_exit_;		
@@ -834,7 +753,7 @@ _func_enter_;
 				}
 			}
 
-			TKIP_SW_ENC_CNT_INC(psecuritypriv,pattrib->ra);
+
 		}
 /*
 		else{
@@ -926,6 +845,7 @@ _func_enter_;
 			}
 			else
 			{
+			        RT_TRACE(_module_rtl871x_security_c_,_drv_err_,("rtw_tkip_decrypt: stainfo!=NULL!!!\n"));
 				prwskey=&stainfo->dot118021x_UncstKey.skey[0];
 				prwskeylen=16;
 			}
@@ -955,8 +875,8 @@ _func_enter_;
 						crc[3],payload[length-1],crc[2],payload[length-2],crc[1],payload[length-3],crc[0],payload[length-4]));
 				res=_FAIL;
 			}
-
-			TKIP_SW_DEC_CNT_INC(psecuritypriv, prxattrib->ra);
+						
+		
 		}
 		else{
 			RT_TRACE(_module_rtl871x_security_c_,_drv_err_,("rtw_tkip_decrypt: stainfo==NULL!!!\n"));
@@ -1733,9 +1653,8 @@ _func_enter_;
 				prwskey=pattrib->dot118021x_UncstKey.skey;
 			}
 
-#ifdef CONFIG_TDLS
+#ifdef CONFIG_TDLS	//swencryption
 			{
-				/* Swencryption */
 				struct	sta_info		*ptdls_sta;
 				ptdls_sta=rtw_get_stainfo(&padapter->stapriv ,&pattrib->dst[0] );
 				if((ptdls_sta != NULL) && (ptdls_sta->tdls_sta_state & TDLS_LINKED_STATE) )
@@ -1765,7 +1684,7 @@ _func_enter_;
 				}
 			}
 
-			AES_SW_ENC_CNT_INC(psecuritypriv, pattrib->ra);
+
 		}
 /*
 		else{
@@ -1773,7 +1692,7 @@ _func_enter_;
 			DBG_871X("%s, psta==NUL\n", __func__);
 			res=_FAIL;
 		}
-*/
+*/						
 	}
 
 
@@ -2090,6 +2009,7 @@ _func_enter_;
 				static u32 no_gkey_bc_cnt = 0;
 				static u32 no_gkey_mc_cnt = 0;
 
+				//in concurrent we should use sw descrypt in group key, so we remove this message			
 				//DBG_871X("rx bc/mc packets, to perform sw rtw_aes_decrypt\n");
 				//prwskey = psecuritypriv->dot118021XGrpKey[psecuritypriv->dot118021XGrpKeyid].skey;
 				if(psecuritypriv->binstallGrpkey==_FALSE)
@@ -2165,10 +2085,10 @@ _func_enter_;
 
 			res= aes_decipher(prwskey,prxattrib->hdrlen,pframe, length);
 
-			AES_SW_DEC_CNT_INC(psecuritypriv, prxattrib->ra);
+
 		}
 		else{
-			RT_TRACE(_module_rtl871x_security_c_,_drv_err_,("rtw_aes_decrypt: stainfo==NULL!!!\n"));
+			RT_TRACE(_module_rtl871x_security_c_,_drv_err_,("rtw_aes_encrypt: stainfo==NULL!!!\n"));
 			res=_FAIL;
 		}
 						
@@ -3113,14 +3033,14 @@ int tdls_verify_mic(u8 *kck, u8 trans_seq,
 
 	if (lnkid == NULL || rsnie == NULL ||
 	    timeoutie == NULL || ftie == NULL){
-		return _FAIL;
+		return 0;
 	}
 	
 	len = 2 * ETH_ALEN + 1 + 2 + 18 + 2 + *(rsnie+1) + 2 + *(timeoutie+1) + 2 + *(ftie+1);
 
 	buf = rtw_zmalloc(len);
 	if (buf == NULL)
-		return _FAIL;
+		return 0;
 
 	pos = buf;
 	/* 1) TDLS initiator STA MAC address */
@@ -3150,17 +3070,17 @@ int tdls_verify_mic(u8 *kck, u8 trans_seq,
 	ret = omac1_aes_128(kck, buf, pos - buf, mic);
 	rtw_mfree(buf, len);
 	if (ret)
-		return _FAIL;
+		return 0;
 	rx_ftie = ftie+4;
 
 	if (os_memcmp(mic, rx_ftie, 16) == 0) {
 		//Valid MIC
-		return _SUCCESS;
+		return 1;
 	}
 
 	//Invalid MIC
 	DBG_871X( "[%s] Invalid MIC\n", __FUNCTION__);
-	return _FAIL;
+	return 0;
 
 }
 #endif //CONFIG_TDLS
@@ -3199,9 +3119,9 @@ void rtw_sec_restore_wep_key(_adapter *adapter)
 		for(keyid=0;keyid<4;keyid++){
 			if(securitypriv->key_mask & BIT(keyid)){
 				if(keyid == securitypriv->dot11PrivacyKeyIndex)
-					rtw_set_key(adapter,securitypriv, keyid, 1, _FALSE);
+					rtw_set_key(adapter,securitypriv, keyid, 1, _TRUE);
 				else
-					rtw_set_key(adapter,securitypriv, keyid, 0, _FALSE);
+					rtw_set_key(adapter,securitypriv, keyid, 0, _TRUE);
 			}
 		}
 	}

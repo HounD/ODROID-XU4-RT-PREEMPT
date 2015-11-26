@@ -285,9 +285,7 @@ int PHY_ConfigRFWithParaFile(IN	PADAPTER	Adapter, IN char*	pFileName, IN u8	eRFP
 int PHY_ConfigRFWithTxPwrTrackParaFile(IN PADAPTER	Adapter, IN char*	pFileName);
 
 int PHY_ConfigRFWithPowerLimitTableParaFile(IN PADAPTER	Adapter, IN char*	pFileName);
-
-void phy_free_filebuf(_adapter *padapter);
-#endif //CONFIG_LOAD_PHY_PARA_FROM_FILE
+#endif
 
 
 #endif //__HAL_COMMON_H__

@@ -673,10 +673,7 @@ _func_enter_;
 
 			case Ndis802_11AutoUnknown:
 			case Ndis802_11InfrastructureMax:
-				break;
-			case Ndis802_11Monitor:
-				set_fwstate(pmlmepriv, WIFI_MONITOR_STATE);
-				break;
+				break;                        				
 		}
 
 		//SecClearAllKeys(adapter);
@@ -710,8 +707,7 @@ _func_enter_;
 		rtw_indicate_disconnect(padapter);
 		//modify for CONFIG_IEEE80211W, none 11w can use it
 		rtw_free_assoc_resources_cmd(padapter);
-		if (_FAIL == rtw_pwr_wakeup(padapter))
-			DBG_871X("%s(): rtw_pwr_wakeup fail !!!\n",__FUNCTION__);
+		rtw_pwr_wakeup(padapter);		
 	}
 
 	_exit_critical_bh(&pmlmepriv->lock, &irqL);
@@ -1255,22 +1251,16 @@ _func_enter_;
 
 		
 			//Set key to CAM through H2C command
-			#if 0
 			if(bgrouptkey)//never go to here
 			{
-				res=rtw_setstakey_cmd(padapter, stainfo, GROUP_KEY, _TRUE);
+				res=rtw_setstakey_cmd(padapter, (unsigned char *)stainfo, _FALSE, _TRUE);
 				RT_TRACE(_module_rtl871x_ioctl_set_c_,_drv_err_,("\n rtw_set_802_11_add_key:rtw_setstakey_cmd(group)\n"));
 			}
 			else{
-				res=rtw_setstakey_cmd(padapter, stainfo, UNICAST_KEY, _TRUE);
+				res=rtw_setstakey_cmd(padapter, (unsigned char *)stainfo, _TRUE, _TRUE);
 				RT_TRACE(_module_rtl871x_ioctl_set_c_,_drv_err_,("\n rtw_set_802_11_add_key:rtw_setstakey_cmd(unicast)\n"));
 			}
-			#else
 			
-			res = rtw_setstakey_cmd(padapter, stainfo, UNICAST_KEY, _TRUE);
-			RT_TRACE(_module_rtl871x_ioctl_set_c_, _drv_err_, ("\n rtw_set_802_11_add_key:rtw_setstakey_cmd(unicast)\n"));
-			#endif
-
 			if(res ==_FALSE)
 				ret= _FAIL;
 			
