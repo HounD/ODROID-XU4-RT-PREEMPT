@@ -17,7 +17,8 @@
 
 #ifndef _GPU_PLATFORM_H_
 #define _GPU_PLATFORM_H_
-#define SOC_NAME 5422
+
+#include "mali_kbase_config_platform.h"
 
 #define GPU_LOG(level, msg, args...) \
 do { \
@@ -151,7 +152,5 @@ struct mali_debug_utilisation_stats
 
 void gpu_set_debug_level(int level);
 int gpu_get_debug_level(void);
-
-int kbase_platform_early_init(struct platform_device *pdev);
 
 #endif /* _GPU_PLATFORM_H_ */

@@ -18,6 +18,8 @@
 #ifndef _GPU_CONTROL_H_
 #define _GPU_CONTROL_H_
 
+#include "mali_kbase_config_platform.h"
+
 typedef enum {
 	GPU_CONTROL_CLOCK_ON = 0,
 	GPU_CONTROL_CLOCK_OFF,
@@ -33,24 +35,6 @@ typedef enum {
 	GPU_CONTROL_PM_QOS_SET,
 	GPU_CONTROL_PM_QOS_RESET,
 } gpu_pmqos_state;
-
-/* mali_kbase_platform */
-#if SOC_NAME == 5422
-#ifdef CONFIG_SOC_EXYNOS5422_REV_0
-#define G3D_MAX_FREQ    600000
-#else
-#define G3D_MAX_FREQ    600000
-#endif /* CONFIG_SOC_EXYNOS5422_REV_0 */
-#define G3D_MIN_FREQ    177000
-#elif SOC_NAME == 5430
-#define G3D_MAX_FREQ    600000
-#define G3D_MIN_FREQ    160000
-#elif SOC_NAME == 5260
-#define G3D_MAX_FREQ    480000
-#define G3D_MIN_FREQ    160000
-#else
-#error SOC_NAME should be specified.
-#endif /* SOC_NAME */
 
 /* GPU NOTIFIER */
 #if SOC_NAME == 5422

@@ -1,6 +1,6 @@
 /*
  *
- * (C) COPYRIGHT ARM Limited. All rights reserved.
+ * (C) COPYRIGHT 2011-2015 ARM Limited. All rights reserved.
  *
  * This program is free software and is provided to you under the terms of the
  * GNU General Public License version 2 as published by the Free Software
@@ -50,10 +50,7 @@ enum {
 	KBASE_CTX_FLAG_SUBMIT_DISABLED = (1u << 0),
 
 	/** Set if the context uses an address space and should be kept scheduled in */
-	KBASE_CTX_FLAG_PRIVILEGED = (1u << 1),
-
-	/** Kernel-side equivalent of BASE_CONTEXT_HINT_ONLY_COMPUTE. Non-mutable after creation flags set */
-	KBASE_CTX_FLAG_HINT_ONLY_COMPUTE = (1u << 2)
+	KBASE_CTX_FLAG_PRIVILEGED = (1u << 1)
 
 	    /* NOTE: Add flags for other things, such as 'is scheduled', and 'is dying' */
 };
@@ -70,32 +67,17 @@ struct kbasep_atom_req {
 
 /* Wrapper Interface - doxygen is elsewhere */
 union kbasep_js_policy {
-#ifdef KBASE_JS_POLICY_AVAILABLE_FCFS
-	struct kbasep_js_policy_fcfs fcfs;
-#endif
-#ifdef KBASE_JS_POLICY_AVAILABLE_CFS
 	struct kbasep_js_policy_cfs cfs;
-#endif
 };
 
 /* Wrapper Interface - doxygen is elsewhere */
 union kbasep_js_policy_ctx_info {
-#ifdef KBASE_JS_POLICY_AVAILABLE_FCFS
-	struct kbasep_js_policy_fcfs_ctx fcfs;
-#endif
-#ifdef KBASE_JS_POLICY_AVAILABLE_CFS
 	struct kbasep_js_policy_cfs_ctx cfs;
-#endif
 };
 
 /* Wrapper Interface - doxygen is elsewhere */
 union kbasep_js_policy_job_info {
-#ifdef KBASE_JS_POLICY_AVAILABLE_FCFS
-	struct kbasep_js_policy_fcfs_job fcfs;
-#endif
-#ifdef KBASE_JS_POLICY_AVAILABLE_CFS
 	struct kbasep_js_policy_cfs_job cfs;
-#endif
 };
 
 
@@ -141,15 +123,10 @@ typedef void (*kbasep_js_policy_ctx_job_cb)(struct kbase_device *kbdev, struct k
  * - The runpool holds a refcount of how many contexts in the runpool have this
  * attribute.
  * - The context holds a refcount of how many atoms have this attribute.
- *
- * Examples of use:
- * - Finding out when there are a mix of @ref BASE_CONTEXT_HINT_ONLY_COMPUTE
- * and ! @ref BASE_CONTEXT_HINT_ONLY_COMPUTE contexts in the runpool
  */
 enum kbasep_js_ctx_attr {
 	/** Attribute indicating a context that contains Compute jobs. That is,
-	 * @ref BASE_CONTEXT_HINT_ONLY_COMPUTE is \b set and/or the context has jobs of type
-	 * @ref BASE_JD_REQ_ONLY_COMPUTE
+	 * the context has jobs of type @ref BASE_JD_REQ_ONLY_COMPUTE
 	 *
 	 * @note A context can be both 'Compute' and 'Non Compute' if it contains
 	 * both types of jobs.
@@ -266,7 +243,7 @@ struct kbasep_js_device_data {
 		 * When bit 'N' is set in this, it indicates whether the context bound to address space
 		 * 'N' (per_as_data[N].kctx) is allowed to submit jobs.
 		 *
-		 * It is placed here because it's much more memory efficient than having a mali_bool8 in
+		 * It is placed here because it's much more memory efficient than having a u8 in
 		 * struct kbasep_js_per_as_data to store this flag  */
 		u16 submit_allowed;
 
@@ -295,9 +272,6 @@ struct kbasep_js_device_data {
 		/** Bitvector to aid affinity checking. Element 'n' bit 'i' indicates
 		 * that slot 'n' is using core i (i.e. slot_affinity_refcount[n][i] > 0) */
 		u64 slot_affinities[BASE_JM_MAX_NR_SLOTS];
-		/** Bitvector indicating which slots \em might have atoms blocked on
-		 * them because otherwise they'd violate affinity restrictions */
-		u16 slots_blocked_on_affinity;
 		/** Refcount for each core owned by each slot. Used to generate the
 		 * slot_affinities array of bitvectors
 		 *
@@ -326,6 +300,22 @@ struct kbasep_js_device_data {
 	 */
 	struct mutex queue_mutex;
 
+	/**
+	 * Scheduling semaphore. This must be held when calling
+	 * kbase_jm_kick()
+	 */
+	struct semaphore schedule_sem;
+
+	/**
+	 * List of contexts that can currently be pulled from
+	 */
+	struct list_head ctx_list_pullable[BASE_JM_MAX_NR_SLOTS];
+	/**
+	 * List of contexts that can not currently be pulled from, but have
+	 * jobs currently running.
+	 */
+	struct list_head ctx_list_unpullable[BASE_JM_MAX_NR_SLOTS];
+
 	u16 as_free;				/**< Bitpattern of free Address Spaces */
 
 	/** Number of currently scheduled user contexts (excluding ones that are not submitting jobs) */
@@ -345,16 +335,16 @@ struct kbasep_js_device_data {
 	 * @note This is a write-once member, and so no locking is required to read */
 	base_jd_core_req js_reqs[BASE_JM_MAX_NR_SLOTS];
 
-	u32 scheduling_tick_ns;		 /**< Value for KBASE_CONFIG_ATTR_JS_SCHEDULING_TICK_NS */
-	u32 soft_stop_ticks;		 /**< Value for KBASE_CONFIG_ATTR_JS_SOFT_STOP_TICKS */
-	u32 soft_stop_ticks_cl;		 /**< Value for KBASE_CONFIG_ATTR_JS_SOFT_STOP_TICKS_CL */
-	u32 hard_stop_ticks_ss;		 /**< Value for KBASE_CONFIG_ATTR_JS_HARD_STOP_TICKS_SS */
-	u32 hard_stop_ticks_cl;		 /**< Value for KBASE_CONFIG_ATTR_JS_HARD_STOP_TICKS_CL */
-	u32 hard_stop_ticks_nss;	 /**< Value for KBASE_CONFIG_ATTR_JS_HARD_STOP_TICKS_NSS */
-	u32 gpu_reset_ticks_ss;		 /**< Value for KBASE_CONFIG_ATTR_JS_RESET_TICKS_SS */
-	u32 gpu_reset_ticks_cl;		 /**< Value for KBASE_CONFIG_ATTR_JS_RESET_TICKS_CL */
-	u32 gpu_reset_ticks_nss;	 /**< Value for KBASE_CONFIG_ATTR_JS_RESET_TICKS_NSS */
-	u32 ctx_timeslice_ns;		 /**< Value for KBASE_CONFIG_ATTR_JS_CTX_TIMESLICE_NS */
+	u32 scheduling_period_ns;    /*< Value for JS_SCHEDULING_PERIOD_NS */
+	u32 soft_stop_ticks;	     /*< Value for JS_SOFT_STOP_TICKS */
+	u32 soft_stop_ticks_cl;	     /*< Value for JS_SOFT_STOP_TICKS_CL */
+	u32 hard_stop_ticks_ss;	     /*< Value for JS_HARD_STOP_TICKS_SS */
+	u32 hard_stop_ticks_cl;	     /*< Value for JS_HARD_STOP_TICKS_CL */
+	u32 hard_stop_ticks_dumping; /*< Value for JS_HARD_STOP_TICKS_DUMPING */
+	u32 gpu_reset_ticks_ss;	     /*< Value for JS_RESET_TICKS_SS */
+	u32 gpu_reset_ticks_cl;	     /*< Value for JS_RESET_TICKS_CL */
+	u32 gpu_reset_ticks_dumping; /*< Value for JS_RESET_TICKS_DUMPING */
+	u32 ctx_timeslice_ns;		 /**< Value for JS_CTX_TIMESLICE_NS */
 	u32 cfs_ctx_runtime_init_slices; /**< Value for DEFAULT_JS_CFS_CTX_RUNTIME_INIT_SLICES */
 	u32 cfs_ctx_runtime_min_slices;	 /**< Value for  DEFAULT_JS_CFS_CTX_RUNTIME_MIN_SLICES */
 
@@ -363,12 +353,20 @@ struct kbasep_js_device_data {
 
 #ifdef CONFIG_MALI_DEBUG
 	/* Support soft-stop on a single context */
-	mali_bool softstop_always;
+	bool softstop_always;
 #endif				/* CONFIG_MALI_DEBUG */
+
 	/** The initalized-flag is placed at the end, to avoid cache-pollution (we should
 	 * only be using this during init/term paths).
 	 * @note This is a write-once member, and so no locking is required to read */
 	int init_status;
+
+	/* Number of contexts that can currently be pulled from */
+	u32 nr_contexts_pullable;
+
+	/* Number of contexts that can either be pulled from or are currently
+	 * running */
+	atomic_t nr_contexts_runnable;
 };
 
 /**
@@ -424,13 +422,18 @@ struct kbasep_js_kctx_info {
 		 *
 		 * This is only ever updated whilst the jsctx_mutex is held.
 		 */
-		mali_bool is_scheduled;
+		bool is_scheduled;
 		/**
 		 * Wait queue to wait for is_scheduled state changes.
 		 * */
 		wait_queue_head_t is_scheduled_wait;
 
-		mali_bool is_dying;			/**< Is the context in the process of being evicted? */
+		bool is_dying;			/**< Is the context in the process of being evicted? */
+
+		/** Link implementing JS queues. Context can be present on one
+		 * list per job slot
+		 */
+		struct list_head ctx_list_entry[BASE_JM_MAX_NR_SLOTS];
 	} ctx;
 
 	/* The initalized-flag is placed at the end, to avoid cache-pollution (we should
@@ -446,6 +449,8 @@ struct kbasep_js_atom_retained_state {
 	enum base_jd_event_code event_code;
 	/** core requirements */
 	base_jd_core_req core_req;
+	/* priority */
+	int sched_priority;
 	/** Job Slot to retry submitting to if submission from IRQ handler failed */
 	int retry_submit_on_slot;
 	/* Core group atom was executed on */
@@ -474,8 +479,25 @@ struct kbasep_js_atom_retained_state {
  */
 #define KBASEP_JS_TICK_RESOLUTION_US 1
 
-#endif				/* _KBASE_JS_DEFS_H_ */
+/*
+ * Internal atom priority defines for kbase_jd_atom::sched_prio
+ */
+enum {
+	KBASE_JS_ATOM_SCHED_PRIO_HIGH = 0,
+	KBASE_JS_ATOM_SCHED_PRIO_MED,
+	KBASE_JS_ATOM_SCHED_PRIO_LOW,
+	KBASE_JS_ATOM_SCHED_PRIO_COUNT,
+};
+
+/* Invalid priority for kbase_jd_atom::sched_prio */
+#define KBASE_JS_ATOM_SCHED_PRIO_INVALID -1
+
+/* Default priority in the case of contexts with no atoms, or being lenient
+ * about invalid priorities from userspace */
+#define KBASE_JS_ATOM_SCHED_PRIO_DEFAULT KBASE_JS_ATOM_SCHED_PRIO_MED
 
 	  /** @} *//* end group kbase_js */
 	  /** @} *//* end group base_kbase_api */
 	  /** @} *//* end group base_api */
+
+#endif				/* _KBASE_JS_DEFS_H_ */
