@@ -524,6 +524,7 @@ int exynos_gpu_add_notifier(struct notifier_block *n)
 {
 	return blocking_notifier_chain_register(&exynos_gpu_notifier, n);
 }
+EXPORT_SYMBOL(exynos_gpu_add_notifier);
 
 void exynos_gpu_call_notifier(enum gpu_noti_state_t cur_state)
 {
