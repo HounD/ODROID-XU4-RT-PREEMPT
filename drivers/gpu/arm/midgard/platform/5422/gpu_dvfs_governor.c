@@ -54,7 +54,7 @@ static gpu_dvfs_info gpu_dvfs_infotbl_default[] = {
 
 #ifdef CONFIG_DYNIMIC_ABB
 static int gpu_abb_infobl_default[] = {900000, 900000, 950000, 1000000, 1075000, 1175000};
-#endif /* SOC_NAME */
+#endif 
 
 #ifdef CONFIG_MALI_MIDGARD_DVFS
 static int gpu_dvfs_governor_default(struct kbase_device *kbdev, int utilization)

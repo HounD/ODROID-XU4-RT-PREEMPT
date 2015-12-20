@@ -12,13 +12,11 @@
 #
 #
 
-platform_name := $(shell echo $(CONFIG_MALI_PLATFORM_THIRDPARTY_NAME))
-
 ifeq ($(CONFIG_MALI_MIDGARD),y)
 	obj-y += \
 		mali_kbase_platform.o \
 		gpu_notifier.o \
-		gpu_control_exynos$(platform_name).o \
+		gpu_control_exynos5422.o \
 		gpu_control.o \
 		gpu_dvfs_handler.o \
 		gpu_dvfs_governor.o \
@@ -28,7 +26,7 @@ else ifeq ($(CONFIG_MALI_MIDGARD),m)
 	SRC += \
 		$(MALI_PLATFORM_THIRDPARTY_DIR)/mali_kbase_platform.c \
 		$(MALI_PLATFORM_THIRDPARTY_DIR)/gpu_notifier.c \
-		$(MALI_PLATFORM_THIRDPARTY_DIR)/gpu_control_exynos$(platform_name).c \
+		$(MALI_PLATFORM_THIRDPARTY_DIR)/gpu_control_exynos5422.c \
 		$(MALI_PLATFORM_THIRDPARTY_DIR)/gpu_control.c \
 		$(MALI_PLATFORM_THIRDPARTY_DIR)/gpu_dvfs_handler.c \
 		$(MALI_PLATFORM_THIRDPARTY_DIR)/gpu_dvfs_governor.c \

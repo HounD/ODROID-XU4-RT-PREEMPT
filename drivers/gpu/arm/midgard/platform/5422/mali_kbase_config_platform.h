@@ -10,24 +10,8 @@
  */
 #include <mali_kbase_config.h>
 
-#define SOC_NAME 5422
-
-#if SOC_NAME == 5422
-#ifdef CONFIG_SOC_EXYNOS5422_REV_0
 #define GPU_FREQ_KHZ_MAX    600000
-#else
-#define GPU_FREQ_KHZ_MAX    600000
-#endif /* CONFIG_SOC_EXYNOS5422_REV_0 */
 #define GPU_FREQ_KHZ_MIN    177000
-#elif SOC_NAME == 5430
-#define GPU_FREQ_KHZ_MAX    600000
-#define GPU_FREQ_KHZ_MIN    160000
-#elif SOC_NAME == 5260
-#define GPU_FREQ_KHZ_MAX    480000
-#define GPU_FREQ_KHZ_MIN    160000
-#else
-#error SOC_NAME should be specified.
-#endif /* SOC_NAME */
 
 extern int get_cpu_clock_speed(u32 *cpu_clock);
 extern struct kbase_platform_funcs_conf platform_funcs;
