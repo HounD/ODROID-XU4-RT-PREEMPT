@@ -178,7 +178,7 @@ static int pm_callback_runtime_on(struct kbase_device *kbdev)
 static void pm_callback_runtime_off(struct kbase_device *kbdev)
 {
 	GPU_LOG(DVFS_INFO, "g3d turn off\n");
-	gpu_control_state_set(kbdev, GPU_CONTROL_CLOCK_OFF, 0);
+	//gpu_control_state_set(kbdev, GPU_CONTROL_CLOCK_OFF, 0);
 }
 
 struct kbase_pm_callback_conf pm_callbacks = {
