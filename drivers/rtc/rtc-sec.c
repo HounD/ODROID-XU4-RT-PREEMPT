@@ -150,7 +150,7 @@ static int s2m_rtc_read_time(struct device *dev, struct rtc_time *tm)
 
 	s2m_data_to_tm(data, tm, info->rtc_24hr_mode);
 
-	printk(KERN_DEBUG "%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
+	pr_debug("%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
 		1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
 		tm->tm_hour, tm->tm_min, tm->tm_sec, tm->tm_wday);
 
@@ -171,7 +171,7 @@ static int s2m_rtc_set_time(struct device *dev, struct rtc_time *tm)
 
 	ret = s2m_rtc_set_time_reg(info, 0);
 
-	printk(KERN_DEBUG "%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
+	pr_debug("%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
 		1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
 		tm->tm_hour, tm->tm_min, tm->tm_sec, tm->tm_wday);
 
@@ -191,7 +191,7 @@ static int s2m_rtc_read_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 
 	s2m_data_to_tm(data, &alrm->time, info->rtc_24hr_mode);
 
-	printk(KERN_DEBUG "%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
+	pr_debug("%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
 		1900 + alrm->time.tm_year, 1 + alrm->time.tm_mon,
 		alrm->time.tm_mday, alrm->time.tm_hour,
 		alrm->time.tm_min, alrm->time.tm_sec,
@@ -275,7 +275,7 @@ static int s2m_rtc_stop_alarm(struct s2m_rtc_info *info)
 
 	s2m_data_to_tm(data, &tm, info->rtc_24hr_mode);
 
-	printk(KERN_DEBUG "%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
+	pr_debug("%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
 		1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday,
 		tm.tm_hour, tm.tm_min, tm.tm_sec, tm.tm_wday);
 
@@ -302,7 +302,7 @@ static int s2m_rtc_start_alarm(struct s2m_rtc_info *info)
 
 	s2m_data_to_tm(data, &tm, info->rtc_24hr_mode);
 
-	printk(KERN_DEBUG "%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
+	pr_debug("%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
 		1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday,
 		tm.tm_hour, tm.tm_min, tm.tm_sec, tm.tm_wday);
 
@@ -334,7 +334,7 @@ static int s2m_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alrm)
 
 	s2m_tm_to_data(&alrm->time, data);
 
-	printk(KERN_DEBUG "%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
+	pr_debug("%s: %d/%d/%d %d:%d:%d(%d)\n", __func__,
 		1900 + alrm->time.tm_year, 1 + alrm->time.tm_mon,
 		alrm->time.tm_mday, alrm->time.tm_hour, alrm->time.tm_min,
 		alrm->time.tm_sec, alrm->time.tm_wday);
