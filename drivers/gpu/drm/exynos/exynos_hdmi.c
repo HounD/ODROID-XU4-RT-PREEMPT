@@ -2582,6 +2582,7 @@ static struct of_device_id hdmi_match_types[] = {
 		/* end node */
 	}
 };
+MODULE_DEVICE_TABLE (of, hdmi_match_types);
 
 static int hdmi_bind(struct device *dev, struct device *master, void *data)
 {
