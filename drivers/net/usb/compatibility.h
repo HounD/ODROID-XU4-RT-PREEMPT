@@ -16,6 +16,8 @@
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0) */
 #endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31) */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0)
+	#define NETIF_F_CSUM_MASK			NETIF_F_ALL_CSUM
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
 	#define skb_vlan_tag_present(__skb)		vlan_tx_tag_present(__skb)
 	#define skb_vlan_tag_get(__skb)			vlan_tx_tag_get(__skb)
@@ -113,6 +115,8 @@
 	}
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 	#define skb_tx_timestamp(skb)
+
+	#define queue_delayed_work(long_wq, work, delay)	schedule_delayed_work(work, delay)
 
 	static inline void usleep_range(unsigned long min, unsigned long max)
 	{
@@ -418,6 +422,7 @@
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(3,13,0) */
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(3,14,0) */
 #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0) */
+#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0) */
 
 #ifndef FALSE
 	#define TRUE	1
