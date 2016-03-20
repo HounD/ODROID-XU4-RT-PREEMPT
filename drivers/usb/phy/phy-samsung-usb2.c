@@ -473,7 +473,10 @@ static int samsung_usb2phy_probe(struct platform_device *pdev)
 	sphy->phy.init		= samsung_usb2phy_init;
 	sphy->phy.shutdown	= samsung_usb2phy_shutdown;
 	sphy->phy.is_active	= samsung_usb2phy_is_active;
-	sphy->ref_clk_freq	= samsung_usbphy_get_refclk_freq(sphy);
+
+	sphy->ref_clk_freq = samsung_usbphy_get_refclk_freq(sphy);
+	if (sphy->ref_clk_freq < 0)
+		return -EINVAL;
 
 	sphy->phy.otg		= otg;
 	sphy->phy.otg->phy	= &sphy->phy;
@@ -629,24 +632,28 @@ static const struct dev_pm_ops samsung_usb2phy_pm_ops = {
 static const struct samsung_usbphy_drvdata usb2phy_s3c64xx = {
 	.cpu_type		= TYPE_S3C64XX,
 	.devphy_en_mask		= S3C64XX_USBPHY_ENABLE,
+	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_64xx,
 };
 
 static const struct samsung_usbphy_drvdata usb2phy_exynos4 = {
 	.cpu_type		= TYPE_EXYNOS4210,
 	.devphy_en_mask		= EXYNOS_USBPHY_ENABLE,
 	.hostphy_en_mask	= EXYNOS_USBPHY_ENABLE,
+	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_64xx,
 };
 
 static struct samsung_usbphy_drvdata usb2phy_exynos5250 = {
 	.cpu_type		= TYPE_EXYNOS5250,
 	.hostphy_en_mask	= EXYNOS_USBPHY_ENABLE,
 	.hostphy_reg_offset	= EXYNOS_USBHOST_PHY_CTRL_OFFSET,
+	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_4x12,
 };
 
 static struct samsung_usbphy_drvdata usb2phy_exynos5 = {
 	.cpu_type		= TYPE_EXYNOS5,
 	.hostphy_en_mask	= EXYNOS_USBPHY_ENABLE,
 	.hostphy_reg_offset	= EXYNOS5_USB2PHY_CTRL_OFFSET,
+	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_4x12,
 };
 
 #ifdef CONFIG_OF
