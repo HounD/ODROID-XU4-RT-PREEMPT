@@ -294,8 +294,8 @@ static int samsung_usb2phy_init(struct usb_phy *phy)
 	/* Disable phy isolation */
 	if (sphy->plat && sphy->plat->pmu_isolation) {
 		sphy->plat->pmu_isolation(false);
-	} else {
-		samsung_usbphy_set_isolation(sphy, false);
+	} else if (sphy->drv_data->set_isolation) {
+		sphy->drv_data->set_isolation(sphy, false);
 		if (sphy->has_hsic_pmureg == true)
 			samsung_hsicphy_set_isolation(sphy, false);
 	}
@@ -378,8 +378,8 @@ static void samsung_usb2phy_shutdown(struct usb_phy *phy)
 	/* Enable phy isolation */
 	if (sphy->plat && sphy->plat->pmu_isolation) {
 		sphy->plat->pmu_isolation(true);
-	} else {
-		samsung_usbphy_set_isolation(sphy, true);
+	} else if (sphy->drv_data->set_isolation) {
+		sphy->drv_data->set_isolation(sphy, true);
 		if (sphy->has_hsic_pmureg == true)
 			samsung_hsicphy_set_isolation(sphy, true);
 	}
@@ -632,7 +632,7 @@ static const struct dev_pm_ops samsung_usb2phy_pm_ops = {
 static const struct samsung_usbphy_drvdata usb2phy_s3c64xx = {
 	.cpu_type		= TYPE_S3C64XX,
 	.devphy_en_mask		= S3C64XX_USBPHY_ENABLE,
-	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_64xx,
+	.rate_to_clksel         =  NULL, /* TODO */
 };
 
 static const struct samsung_usbphy_drvdata usb2phy_exynos4 = {
@@ -640,6 +640,7 @@ static const struct samsung_usbphy_drvdata usb2phy_exynos4 = {
 	.devphy_en_mask		= EXYNOS_USBPHY_ENABLE,
 	.hostphy_en_mask	= EXYNOS_USBPHY_ENABLE,
 	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_64xx,
+	.set_isolation          = samsung_usbphy_set_isolation_4210,
 };
 
 static struct samsung_usbphy_drvdata usb2phy_exynos5250 = {
@@ -647,6 +648,7 @@ static struct samsung_usbphy_drvdata usb2phy_exynos5250 = {
 	.hostphy_en_mask	= EXYNOS_USBPHY_ENABLE,
 	.hostphy_reg_offset	= EXYNOS_USBHOST_PHY_CTRL_OFFSET,
 	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_4x12,
+	.set_isolation          = samsung_usbphy_set_isolation_4210,
 };
 
 static struct samsung_usbphy_drvdata usb2phy_exynos5 = {
@@ -654,6 +656,7 @@ static struct samsung_usbphy_drvdata usb2phy_exynos5 = {
 	.hostphy_en_mask	= EXYNOS_USBPHY_ENABLE,
 	.hostphy_reg_offset	= EXYNOS5_USB2PHY_CTRL_OFFSET,
 	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_4x12,
+	.set_isolation          = samsung_usbphy_set_isolation_4210,
 };
 
 #ifdef CONFIG_OF
