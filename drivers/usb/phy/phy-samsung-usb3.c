@@ -65,7 +65,7 @@ static u32 samsung_usb3phy_set_refclk(struct samsung_usbphy *sphy)
 	return reg;
 }
 
-static int samsung_exynos5_usb3phy_enable(struct samsung_usbphy *sphy)
+static void samsung_exynos5_usb3phy_enable(struct samsung_usbphy *sphy)
 {
 	void __iomem *regs = sphy->regs;
 	u32 phyparam0;
@@ -133,8 +133,6 @@ static int samsung_exynos5_usb3phy_enable(struct samsung_usbphy *sphy)
 
 	phyclkrst &= ~(PHYCLKRST_PORTRESET);
 	writel(phyclkrst, regs + EXYNOS5_DRD_PHYCLKRST);
-
-	return 0;
 }
 
 static void samsung_exynos5_usb3phy_disable(struct samsung_usbphy *sphy)
@@ -270,10 +268,11 @@ static int samsung_usb3phy_init(struct usb_phy *phy)
 	samsung_usbphy_set_type(&sphy->phy, USB_PHY_TYPE_DEVICE);
 
 	/* Disable phy isolation */
-	samsung_usbphy_set_isolation(sphy, false);
+	if (sphy->drv_data->set_isolation)
+		sphy->drv_data->set_isolation(sphy, false);
 
 	/* Initialize usb phy registers */
-	samsung_exynos5_usb3phy_enable(sphy);
+	sphy->drv_data->phy_enable(sphy);
 
 exit:
 	spin_unlock_irqrestore(&sphy->lock, flags);
@@ -290,10 +289,10 @@ static void __samsung_usb3phy_shutdown(struct samsung_usbphy *sphy)
 	samsung_usbphy_set_type(&sphy->phy, USB_PHY_TYPE_DEVICE);
 
 	/* De-initialize usb phy registers */
-	samsung_exynos5_usb3phy_disable(sphy);
+	sphy->drv_data->phy_disable(sphy);
 
-	/* Enable phy isolation */
-	samsung_usbphy_set_isolation(sphy, true);
+	if (sphy->drv_data->set_isolation)
+		sphy->drv_data->set_isolation(sphy, true);
 }
 
 /*
@@ -472,7 +471,10 @@ static int samsung_usb3phy_probe(struct platform_device *pdev)
 	sphy->phy.is_active	= samsung_usb3phy_is_active;
 	sphy->phy.tune		= samsung_usb3phy_tune;
 	sphy->drv_data		= samsung_usbphy_get_driver_data(pdev);
-	sphy->ref_clk_freq	= samsung_usbphy_get_refclk_freq(sphy);
+
+	sphy->ref_clk_freq = samsung_usbphy_get_refclk_freq(sphy);
+	if (sphy->ref_clk_freq < 0)
+		return -EINVAL;
 
 	spin_lock_init(&sphy->lock);
 
@@ -551,18 +553,30 @@ static int samsung_usb3phy_resume(struct device *dev)
 static struct samsung_usbphy_drvdata usb3phy_exynos5250 = {
 	.cpu_type		= TYPE_EXYNOS5250,
 	.devphy_en_mask		= EXYNOS_USBPHY_ENABLE,
+	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_4x12,
+	.set_isolation          = samsung_usbphy_set_isolation_4210,
+	.phy_enable             = samsung_exynos5_usb3phy_enable,
+	.phy_disable            = samsung_exynos5_usb3phy_disable,
 	.need_crport_tuning	= false,
 };
 
 static struct samsung_usbphy_drvdata usb3phy_exynos5420 = {
 	.cpu_type		= TYPE_EXYNOS5,
 	.devphy_en_mask		= EXYNOS_USBPHY_ENABLE,
+	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_4x12,
+	.set_isolation          = samsung_usbphy_set_isolation_4210,
+	.phy_enable             = samsung_exynos5_usb3phy_enable,
+	.phy_disable            = samsung_exynos5_usb3phy_disable,
 	.need_crport_tuning	= true,
 };
 
 static struct samsung_usbphy_drvdata usb3phy_exynos5 = {
 	.cpu_type		= TYPE_EXYNOS5,
 	.devphy_en_mask		= EXYNOS_USBPHY_ENABLE,
+	.rate_to_clksel         = samsung_usbphy_rate_to_clksel_4x12,
+	.set_isolation          = samsung_usbphy_set_isolation_4210,
+	.phy_enable             = samsung_exynos5_usb3phy_enable,
+	.phy_disable            = samsung_exynos5_usb3phy_disable,
 	.need_crport_tuning	= false,
 };
 

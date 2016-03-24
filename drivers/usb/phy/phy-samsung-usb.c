@@ -76,7 +76,7 @@ EXPORT_SYMBOL_GPL(samsung_usbphy_parse_dt);
  * Here 'on = true' would mean USB PHY block is isolated, hence
  * de-activated and vice-versa.
  */
-void samsung_usbphy_set_isolation(struct samsung_usbphy *sphy, bool on)
+void samsung_usbphy_set_isolation_4210(struct samsung_usbphy *sphy, bool on)
 {
 	void __iomem *reg = NULL;
 	u32 reg_val;
@@ -87,33 +87,12 @@ void samsung_usbphy_set_isolation(struct samsung_usbphy *sphy, bool on)
 		return;
 	}
 
-	switch (sphy->drv_data->cpu_type) {
-	case TYPE_S3C64XX:
-		/*
-		 * Do nothing: We will add here once S3C64xx goes for DT support
-		 */
-		break;
-	case TYPE_EXYNOS4210:
-		/*
-		 * Fall through since exynos4210 and exynos5250 have similar
-		 * register architecture: two separate registers for host and
-		 * device phy control with enable bit at position 0.
-		 */
-	case TYPE_EXYNOS5250:
-	case TYPE_EXYNOS5:
-		if (sphy->phy_type == USB_PHY_TYPE_DEVICE) {
-			reg = sphy->pmuregs +
-				sphy->drv_data->devphy_reg_offset;
-			en_mask = sphy->drv_data->devphy_en_mask;
-		} else if (sphy->phy_type == USB_PHY_TYPE_HOST) {
-			reg = sphy->pmuregs +
-				sphy->drv_data->hostphy_reg_offset;
-			en_mask = sphy->drv_data->hostphy_en_mask;
-		}
-		break;
-	default:
-		dev_err(sphy->dev, "Invalid SoC type\n");
-		return;
+	if (sphy->phy_type == USB_PHY_TYPE_DEVICE) {
+		reg = sphy->pmuregs + sphy->drv_data->devphy_reg_offset;
+		en_mask = sphy->drv_data->devphy_en_mask;
+	} else if (sphy->phy_type == USB_PHY_TYPE_HOST) {
+		reg = sphy->pmuregs + sphy->drv_data->hostphy_reg_offset;
+		en_mask = sphy->drv_data->hostphy_en_mask;
 	}
 
 	if (reg) {
@@ -127,7 +106,7 @@ void samsung_usbphy_set_isolation(struct samsung_usbphy *sphy, bool on)
 		writel(reg_val, reg);
 	}
 }
-EXPORT_SYMBOL_GPL(samsung_usbphy_set_isolation);
+EXPORT_SYMBOL_GPL(samsung_usbphy_set_isolation_4210);
 
 void samsung_hsicphy_set_isolation(struct samsung_usbphy *sphy, bool on)
 {
@@ -207,13 +186,76 @@ int samsung_usbphy_set_type(struct usb_phy *phy,
 }
 EXPORT_SYMBOL_GPL(samsung_usbphy_set_type);
 
+int samsung_usbphy_rate_to_clksel_64xx(struct samsung_usbphy *sphy,
+							unsigned long rate)
+{
+	unsigned int clksel;
+
+	switch (rate) {
+	case 12 * MHZ:
+		clksel = PHYCLK_CLKSEL_12M;
+		break;
+	case 24 * MHZ:
+		clksel = PHYCLK_CLKSEL_24M;
+		break;
+	case 48 * MHZ:
+		clksel = PHYCLK_CLKSEL_48M;
+		break;
+	default:
+		dev_err(sphy->dev,
+			"Invalid reference clock frequency: %lu\n", rate);
+		return -EINVAL;
+	}
+
+	return clksel;
+}
+EXPORT_SYMBOL_GPL(samsung_usbphy_rate_to_clksel_64xx);
+
+int samsung_usbphy_rate_to_clksel_4x12(struct samsung_usbphy *sphy,
+							unsigned long rate)
+{
+	unsigned int clksel;
+
+	switch (rate) {
+	case 9600 * KHZ:
+		clksel = FSEL_CLKSEL_9600K;
+		break;
+	case 10 * MHZ:
+		clksel = FSEL_CLKSEL_10M;
+		break;
+	case 12 * MHZ:
+		clksel = FSEL_CLKSEL_12M;
+		break;
+	case 19200 * KHZ:
+		clksel = FSEL_CLKSEL_19200K;
+		break;
+	case 20 * MHZ:
+		clksel = FSEL_CLKSEL_20M;
+		break;
+	case 24 * MHZ:
+		clksel = FSEL_CLKSEL_24M;
+		break;
+	case 50 * MHZ:
+		clksel = FSEL_CLKSEL_50M;
+		break;
+	default:
+		dev_err(sphy->dev,
+			"Invalid reference clock frequency: %lu\n", rate);
+		return -EINVAL;
+	}
+
+	return clksel;
+}
+EXPORT_SYMBOL_GPL(samsung_usbphy_rate_to_clksel_4x12);
+
 /*
  * Returns reference clock frequency selection value
  */
 int samsung_usbphy_get_refclk_freq(struct samsung_usbphy *sphy)
 {
 	struct clk *ref_clk;
-	int refclk_freq = 0;
+	unsigned long rate;
+	int refclk_freq;
 
 	/*
 	 * In exynos5250 USB host and device PHY use
@@ -229,53 +271,9 @@ int samsung_usbphy_get_refclk_freq(struct samsung_usbphy *sphy)
 		return PTR_ERR(ref_clk);
 	}
 
-	if (sphy->drv_data->cpu_type == TYPE_EXYNOS5250 ||
-		sphy->drv_data->cpu_type == TYPE_EXYNOS5) {
-		/* set clock frequency for PLL */
-		switch (clk_get_rate(ref_clk)) {
-		case 9600 * KHZ:
-			refclk_freq = FSEL_CLKSEL_9600K;
-			break;
-		case 10 * MHZ:
-			refclk_freq = FSEL_CLKSEL_10M;
-			break;
-		case 12 * MHZ:
-			refclk_freq = FSEL_CLKSEL_12M;
-			break;
-		case 19200 * KHZ:
-			refclk_freq = FSEL_CLKSEL_19200K;
-			break;
-		case 20 * MHZ:
-			refclk_freq = FSEL_CLKSEL_20M;
-			break;
-		case 50 * MHZ:
-			refclk_freq = FSEL_CLKSEL_50M;
-			break;
-		case 24 * MHZ:
-		default:
-			/* default reference clock */
-			refclk_freq = FSEL_CLKSEL_24M;
-			break;
-		}
-	} else {
-		switch (clk_get_rate(ref_clk)) {
-		case 12 * MHZ:
-			refclk_freq = PHYCLK_CLKSEL_12M;
-			break;
-		case 24 * MHZ:
-			refclk_freq = PHYCLK_CLKSEL_24M;
-			break;
-		case 48 * MHZ:
-			refclk_freq = PHYCLK_CLKSEL_48M;
-			break;
-		default:
-			if (sphy->drv_data->cpu_type == TYPE_S3C64XX)
-				refclk_freq = PHYCLK_CLKSEL_48M;
-			else
-				refclk_freq = PHYCLK_CLKSEL_24M;
-			break;
-		}
-	}
+	rate = clk_get_rate(ref_clk);
+	refclk_freq = sphy->drv_data->rate_to_clksel(sphy, rate);
+
 	clk_put(ref_clk);
 
 	return refclk_freq;
