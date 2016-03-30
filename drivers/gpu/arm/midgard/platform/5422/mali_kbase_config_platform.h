@@ -21,3 +21,4 @@ extern struct kbase_pm_callback_conf pm_callbacks;
 #define GPU_SPEED_FUNC (NULL)
 #define PLATFORM_FUNCS (&platform_funcs)
 #define POWER_MANAGEMENT_CALLBACKS (&pm_callbacks)
+#define CONFIG_MALI_MIDGARD_DEBUG_SYS
