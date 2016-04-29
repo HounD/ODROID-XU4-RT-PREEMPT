@@ -26,8 +26,6 @@
 #include "i2s.h"
 #include "i2s-regs.h"
 
-#define ODROID_AUD_PLL_FREQ	196608009
-
 static struct snd_soc_card odroid;
 static bool is_dummy_codec = false;
 
@@ -45,8 +43,6 @@ static int set_aud_pll_rate(unsigned long rate)
 		goto out;
 
 	clk_set_rate(fout_epll, rate);
-	printk("%s[%d] : aud_pll set_rate=%ld, get_rate = %ld\n",
-		__func__,__LINE__,rate,clk_get_rate(fout_epll));
 out:
 	clk_put(fout_epll);
 
@@ -78,75 +74,14 @@ static int odroid_hw_params(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-	switch (params_rate(params)) {
-	case 16000:
-	case 22050:
-	case 24000:
-	case 32000:
-	case 44100:
-	case 48000:
-	case 88200:
-	case 96000:
-		if (bfs == 48)
-			rfs = 384;
-		else
-			rfs = 256;
-		break;
-	case 64000:
-		rfs = 384;
-		break;
-	case 8000:
-	case 11025:
-	case 12000:
-		if (bfs == 48)
-			rfs = 768;
-		else
-			rfs = 512;
-		break;
-	default:
-		return -EINVAL;
-	}
-
+	psr=4;
+	div=4;
+	rfs = 256;
 	rclk = params_rate(params) * rfs;
-
-	switch (rclk) {
-	case 4096000:
-	case 5644800:
-	case 6144000:
-	case 8467200:
-	case 9216000:
-		psr = 8;
-		break;
-	case 8192000:
-	case 11289600:
-	case 12288000:
-	case 16934400:
-	case 18432000:
-		psr = 4;
-		break;
-	case 22579200:
-	case 24576000:
-	case 33868800:
-	case 36864000:
-		psr = 2;
-		break;
-	case 67737600:
-	case 73728000:
-		psr = 1;
-		break;
-	default:
-		printk("Not yet supported!\n");
-		return -EINVAL;
-	}
 
 	/* Set AUD_PLL frequency */
 	sclk = rclk * psr;
-	for (div = 2; div <= 16; div++) {
-		if (sclk * div > ODROID_AUD_PLL_FREQ)
-			break;
-	}
-	pll = sclk * (div - 1);
-
+	pll = sclk * div;
 	set_aud_pll_rate(pll);
 
 	/* Set CPU DAI configuration */
