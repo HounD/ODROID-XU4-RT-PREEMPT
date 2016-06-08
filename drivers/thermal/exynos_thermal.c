@@ -1798,7 +1798,7 @@ exynos_thermal_sensor_temp(struct device *dev,
 	return len;
 }
 
-static DEVICE_ATTR(temp, S_IRUSR | S_IRGRP, exynos_thermal_sensor_temp, NULL);
+static DEVICE_ATTR(temp, 0444, exynos_thermal_sensor_temp, NULL);
 
 static ssize_t exynos_throttle_counter(struct device *dev,
 			struct device_attribute *attr, char *buf)
