@@ -76,23 +76,23 @@ struct odroid_fan {
 //[*]------------------------------------------------------------------------------------------------------------------
 static	ssize_t set_pwm_enable	(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 static	ssize_t show_pwm_status	(struct device *dev, struct device_attribute *attr, char *buf);
-static	DEVICE_ATTR(pwm_enable, S_IRWXUGO, show_pwm_status, set_pwm_enable);
+static	DEVICE_ATTR(pwm_enable, 0644, show_pwm_status, set_pwm_enable);
 
 static	ssize_t set_fan_mode	(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 static	ssize_t show_fan_mode	(struct device *dev, struct device_attribute *attr, char *buf);
-static	DEVICE_ATTR(fan_mode, S_IRWXUGO, show_fan_mode, set_fan_mode);
+static	DEVICE_ATTR(fan_mode, 0644, show_fan_mode, set_fan_mode);
 
 static	ssize_t set_pwm_duty	(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 static	ssize_t show_pwm_duty	(struct device *dev, struct device_attribute *attr, char *buf);
-static	DEVICE_ATTR(pwm_duty, S_IRWXUGO, show_pwm_duty, set_pwm_duty);
+static	DEVICE_ATTR(pwm_duty, 0644, show_pwm_duty, set_pwm_duty);
 
 static	ssize_t set_temp_levels		(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 static	ssize_t show_temp_levels	(struct device *dev, struct device_attribute *attr, char *buf);
-static	DEVICE_ATTR(temp_levels, S_IRWXUGO, show_temp_levels, set_temp_levels);
+static	DEVICE_ATTR(temp_levels, 0644, show_temp_levels, set_temp_levels);
 
 static	ssize_t set_fan_speeds	(struct device *dev, struct device_attribute *attr, const char *buf, size_t count);
 static	ssize_t show_fan_speeds	(struct device *dev, struct device_attribute *attr, char *buf);
-static	DEVICE_ATTR(fan_speeds, S_IRWXUGO, show_fan_speeds, set_fan_speeds);
+static	DEVICE_ATTR(fan_speeds, 0644, show_fan_speeds, set_fan_speeds);
 
 static struct attribute *odroid_fan_sysfs_entries[] = {
 	&dev_attr_pwm_enable.attr,
