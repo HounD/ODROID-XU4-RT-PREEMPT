@@ -184,9 +184,9 @@ static inline int tick_check_broadcast_expired(void) { return 0; }
 #endif
 
 #ifdef CONFIG_GENERIC_CLOCKEVENTS
-extern int clockevents_notify(unsigned long reason, void *arg);
+extern void clockevents_notify(unsigned long reason, void *arg);
 #else
-static inline int clockevents_notify(unsigned long reason, void *arg) { return 0; }
+static inline void clockevents_notify(unsigned long reason, void *arg) {}
 #endif
 
 #else /* CONFIG_GENERIC_CLOCKEVENTS_BUILD */
@@ -194,7 +194,7 @@ static inline int clockevents_notify(unsigned long reason, void *arg) { return 0
 static inline void clockevents_suspend(void) {}
 static inline void clockevents_resume(void) {}
 
-static inline int clockevents_notify(unsigned long reason, void *arg) { return 0; }
+static inline void clockevents_notify(unsigned long reason, void *arg) {}
 static inline int tick_check_broadcast_expired(void) { return 0; }
 
 #endif
