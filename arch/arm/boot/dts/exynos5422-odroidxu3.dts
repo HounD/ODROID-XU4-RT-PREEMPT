@@ -570,7 +570,7 @@
 			reg = <1>;      /* CS0 */
 			compatible = "ti,ads7846";
 			interrupt-parent = <&gpa0>;
-			interrupts = <3 0>;     /* BOOT6 / GPIO 8 */
+			interrupts = <3 3>;     /* BOOT6 / GPIO 8 */
 			spi-max-frequency = <1000000>;
 			pendown-gpio = <&gpa0 3 0>;
 			vcc-supply = <&ldo30_reg>;
