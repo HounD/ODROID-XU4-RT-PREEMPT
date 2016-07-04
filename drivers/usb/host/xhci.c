@@ -182,9 +182,15 @@ int xhci_reset(struct xhci_hcd *xhci)
 			STS_CNR, 0, 10 * 1000 * 1000);
 
 	for (i = 0; i < 2; ++i) {
+#ifdef CONFIG_MACH_ODROIDXU3
+		xhci->bus_state[i].port_c_suspend = 1;
+		xhci->bus_state[i].suspended_ports = 1;
+		xhci->bus_state[i].resuming_ports = 1;
+#else
 		xhci->bus_state[i].port_c_suspend = 0;
 		xhci->bus_state[i].suspended_ports = 0;
 		xhci->bus_state[i].resuming_ports = 0;
+#endif
 	}
 
 	return ret;

@@ -59,10 +59,14 @@ static void xhci_common_hub_descriptor(struct xhci_hcd *xhci,
 	desc->bNbrPorts = ports;
 	temp = 0;
 	/* Bits 1:0 - support per-port power switching, or power always on */
+#ifdef CONFIG_MACH_ODROIDXU3
+	temp |= HUB_CHAR_INDV_PORT_LPSM;
+#else
 	if (HCC_PPC(xhci->hcc_params))
 		temp |= HUB_CHAR_INDV_PORT_LPSM;
 	else
 		temp |= HUB_CHAR_NO_LPSM;
+#endif
 	/* Bit  2 - root hubs are not part of a compound device */
 	/* Bits 4:3 - individual port over current protection */
 	temp |= HUB_CHAR_INDV_PORT_OCPM;
@@ -141,8 +145,13 @@ static void xhci_usb3_hub_descriptor(struct usb_hcd *hcd, struct xhci_hcd *xhci,
 	/* header decode latency should be zero for roothubs,
 	 * see section 4.23.5.2.
 	 */
+#ifdef CONFIG_MACH_ODROIDXU3
+	desc->u.ss.bHubHdrDecLat = 0x04;
+	desc->u.ss.wHubDelay = 0x04;
+#else
 	desc->u.ss.bHubHdrDecLat = 0;
 	desc->u.ss.wHubDelay = 0;
+#endif
 
 	port_removable = 0;
 	/* bit 0 is reserved, bit 1 is for port 1, etc. */
@@ -1034,6 +1043,11 @@ int xhci_hub_status_data(struct usb_hcd *hcd, char *buf)
 
 #ifdef CONFIG_PM
 
+#ifdef CONFIG_MACH_ODROIDXU3
+// function defined at drivers/usb/phy/phy-samsung-usb3.c
+extern void samsung_usb3phy_retune(int);
+#endif
+
 int xhci_bus_suspend(struct usb_hcd *hcd)
 {
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
@@ -1203,6 +1217,9 @@ int xhci_bus_resume(struct usb_hcd *hcd)
 			tmp &= ~PORT_RWE;
 			xhci_writel(xhci, tmp, addr);
 		}
+#ifdef CONFIG_MACH_ODROIDXU3
+		samsung_usb3phy_retune(port_index);
+#endif
 	}
 
 	(void) xhci_readl(xhci, &xhci->op_regs->command);

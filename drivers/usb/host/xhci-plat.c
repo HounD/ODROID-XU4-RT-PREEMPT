@@ -33,6 +33,10 @@ static void xhci_plat_quirks(struct device *dev, struct xhci_hcd *xhci)
 	 * dev struct in order to setup MSI
 	 */
 	xhci->quirks |= XHCI_PLAT;
+#ifdef CONFIG_MACH_ODROIDXU3
+	xhci->quirks |= XHCI_SPURIOUS_REBOOT;
+	xhci->quirks |= XHCI_LPM_SUPPORT;
+#endif
 }
 
 /* called during probe() after chip reset completes */
