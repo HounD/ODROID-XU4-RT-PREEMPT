@@ -4302,11 +4302,7 @@ hub_port_init (struct usb_hub *hub, struct usb_device *udev, int port1,
 	if (udev->wusb == 0 && le16_to_cpu(udev->descriptor.bcdUSB) >= 0x0201) {
 		retval = usb_get_bos_descriptor(udev);
 		if (!retval) {
-#ifdef CONFIG_MACH_ODROIDXU3
-			udev->lpm_capable = 1;
-#else
 			udev->lpm_capable = usb_device_supports_lpm(udev);
-#endif
 			usb_set_lpm_parameters(udev);
 		}
 	}
