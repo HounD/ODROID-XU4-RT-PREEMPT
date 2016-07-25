@@ -23,7 +23,8 @@
 
 enum link_rate_type {
 	LINK_RATE_1_62GBPS = 0x06,
-	LINK_RATE_2_70GBPS = 0x0a
+	LINK_RATE_2_70GBPS = 0x0a,
+	LINK_RATE_5_40GBPS = 0x14
 };
 
 enum link_lane_count_type {
