@@ -672,7 +672,7 @@ static void exynos_dp_init_training(struct exynos_dp_device *dp,
 	if ((dp->link_train.link_rate != LINK_RATE_1_62GBPS) &&
 	   (dp->link_train.link_rate != LINK_RATE_2_70GBPS)) {
 		if (dp->link_train.link_rate == LINK_RATE_5_40GBPS) {
-			dev_err(dp->dev, "Rx Max Link Rate 5.4GBPS is too high, fallback to half!\n")
+			dev_err(dp->dev, "Rx Max Link Rate 5.4GBPS is too high, fallback to 2.7GBPS!\n");
 			dp->link_train.link_rate = LINK_RATE_2_70GBPS;
 		} else {
 			dev_err(dp->dev, "Rx Max Link Rate is abnormal :%x !\n",
