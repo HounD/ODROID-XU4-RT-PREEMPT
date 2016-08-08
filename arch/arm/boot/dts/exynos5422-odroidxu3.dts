@@ -460,6 +460,24 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&audio_irq>;
 		};
+
+		/* Hardkernel I2C 3.5" Touchscreen */
+		/* drivers/input/sx865x.c */
+		sx865x: sx865x@49	{
+			status = "okay";
+			compatible = "semtech,sx8650";
+			reg = <0x49>;
+			#clock-cells = <0>;
+
+			/* H/W Pin control setup */
+			gpio-pendown = <&gpx3 1 0xf>;
+			gpio-reset   = <&gpx2 5 0x0>;
+
+			/* platform data setup */
+			invert-x = <0>;
+			invert-y = <1>;
+			swap-xy = <1>;
+		};
 	};
 
 	pinctrl@13400000 {
