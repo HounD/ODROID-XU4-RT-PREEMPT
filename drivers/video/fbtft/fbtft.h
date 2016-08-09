@@ -254,7 +254,18 @@ struct fbtft_par {
 	struct timespec update_time;
 	bool bgr;
 	void *extra;
+#if defined(CONFIG_MACH_ODROIDXU3)
+	void __iomem *reg_gpx1;
+	void __iomem *reg_gpx2;
+	void __iomem *reg_gpa2;
+#endif
 };
+
+#if defined(CONFIG_MACH_ODROIDXU3)
+	#define	ODROIDXU3_GPX1_REG	0x13400C24
+	#define	ODROIDXU3_GPX2_REG	0x13400C44
+	#define	ODROIDXU3_GPA2_REG	0x14010044
+#endif
 
 #define NUMARGS(...)  (sizeof((int[]){__VA_ARGS__})/sizeof(int))
 
@@ -287,6 +298,10 @@ extern int fbtft_write_gpio8_wr(struct fbtft_par *par, void *buf, size_t len);
 extern int fbtft_write_gpio16_wr(struct fbtft_par *par, void *buf, size_t len);
 extern int fbtft_write_gpio16_wr_latched(struct fbtft_par *par,
 	void *buf, size_t len);
+
+#if defined(CONFIG_MACH_ODROIDXU3)
+extern int fbtft_write_reg_wr(struct fbtft_par *par, void *buf, size_t len);
+#endif
 
 /* fbtft-bus.c */
 extern int fbtft_write_vmem8_bus8(struct fbtft_par *par, size_t offset, size_t len);

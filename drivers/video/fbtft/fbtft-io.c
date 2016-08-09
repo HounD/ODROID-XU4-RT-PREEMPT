@@ -406,4 +406,68 @@ int fbtft_write_gpio16_wr_latched(struct fbtft_par *par, void *buf, size_t len)
 }
 EXPORT_SYMBOL(fbtft_write_gpio16_wr_latched);
 
+#if defined(CONFIG_MACH_ODROIDXU3)
+
+union	reg_bitfield {
+	unsigned int	wvalue;
+	struct {
+		unsigned int	bit0 : 1;
+		unsigned int	bit1 : 1;
+		unsigned int	bit2 : 1;
+		unsigned int	bit3 : 1;
+		unsigned int	bit4 : 1;
+		unsigned int	bit5 : 1;
+		unsigned int	bit6 : 1;
+		unsigned int	bit7 : 1;
+		unsigned int	bit8_bit31 : 24;
+	} bits;
+};
+
+int fbtft_write_reg_wr(struct fbtft_par *par, void *buf, size_t len)
+{
+	u8 	data;
+	union	reg_bitfield	gpx1, gpx2, gpa2;
+
+	fbtft_par_dbg_hex(DEBUG_WRITE, par, par->info->device, u8, buf, len,
+		"%s(len=%d): ", __func__, len);
+
+	if ((par->reg_gpx1 == NULL) ||
+	    (par->reg_gpx2 == NULL) ||
+	    (par->reg_gpa2 == NULL)) {
+		pr_err("%s : ioremap gpio register fail!\n", __func__);
+		return	0;
+	}
+
+	gpx1.wvalue = ioread32(par->reg_gpx1);
+	gpx2.wvalue = ioread32(par->reg_gpx2);
+	gpa2.wvalue = ioread32(par->reg_gpa2);
+
+	while (len--) {
+		data = *(u8 *) buf;
+		gpx1.bits.bit7 = (data & 0x01) ? 1 : 0;
+		gpx2.bits.bit0 = (data & 0x02) ? 1 : 0;
+		gpx1.bits.bit3 = (data & 0x04) ? 1 : 0;
+		gpa2.bits.bit4 = (data & 0x08) ? 1 : 0;
+		gpa2.bits.bit6 = (data & 0x10) ? 1 : 0;
+		gpa2.bits.bit7 = (data & 0x20) ? 1 : 0;
+		gpx1.bits.bit6 = (data & 0x40) ? 1 : 0;
+		gpx1.bits.bit5 = (data & 0x80) ? 1 : 0;
+		/* Start writing by pulling down /WR */
+		gpa2.bits.bit5 = 0;
+		iowrite32(gpx1.wvalue, par->reg_gpx1);
+		iowrite32(gpx2.wvalue, par->reg_gpx2);
+		iowrite32(gpa2.wvalue, par->reg_gpa2);
+		gpa2.bits.bit5 = 1;
+		iowrite32(gpa2.wvalue, par->reg_gpa2);
+
+		buf++;
+	}
+
+	return 0;
+}
+
+EXPORT_SYMBOL(fbtft_write_reg_wr);
+
+#endif /* #if defined(CONFIG_MACH_ODROIDXU3) */
+
 #endif /* CONFIG_ARCH_BCM2708 */
