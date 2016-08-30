@@ -1055,6 +1055,11 @@ static int match_child(struct device *dev, void *data)
 	return !strcmp(dev_name(dev), (char *)data);
 }
 
+static void s5p_mfc_memdev_release(struct device *dev)
+{
+	dma_release_declared_memory(dev);
+}
+
 static void *mfc_get_drv_data(struct platform_device *pdev);
 
 #ifdef CONFIG_EXYNOS_IOMMU
@@ -1089,6 +1094,9 @@ static int s5p_mfc_alloc_memdevs_noiommu(struct s5p_mfc_dev *dev)
 		mfc_err("Not enough memory\n");
 		return -ENOMEM;
 	}
+
+	dev_set_name(dev->mem_dev_l, "%s", "s5p-mfc-l");
+	dev->mem_dev_l->release = s5p_mfc_memdev_release;
 	device_initialize(dev->mem_dev_l);
 	of_property_read_u32_array(dev->plat_dev->dev.of_node,
 			"samsung,mfc-l", mem_info, 2);
@@ -1106,6 +1114,9 @@ static int s5p_mfc_alloc_memdevs_noiommu(struct s5p_mfc_dev *dev)
 		mfc_err("Not enough memory\n");
 		return -ENOMEM;
 	}
+
+	dev_set_name(dev->mem_dev_r, "%s", "s5p-mfc-r");
+	dev->mem_dev_r->release = s5p_mfc_memdev_release;
 	device_initialize(dev->mem_dev_r);
 	of_property_read_u32_array(dev->plat_dev->dev.of_node,
 			"samsung,mfc-r", mem_info, 2);

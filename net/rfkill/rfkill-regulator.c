@@ -42,7 +42,8 @@ static int rfkill_regulator_set_block(void *data, bool blocked)
 	} else {
 		if (!rfkill_data->reg_enabled) {
 			ret = regulator_enable(rfkill_data->vcc);
-			rfkill_data->reg_enabled = true;
+			if (!ret)
+				rfkill_data->reg_enabled = true;
 		}
 	}
 
