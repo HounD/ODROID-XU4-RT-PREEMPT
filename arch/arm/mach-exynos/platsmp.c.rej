@@ -1,0 +1,11 @@
+--- arch/arm/mach-exynos/platsmp.c
++++ arch/arm/mach-exynos/platsmp.c
+@@ -126,7 +126,7 @@ static int __cpuinit exynos_boot_secondary(unsigned int cpu, struct task_struct
+ 
+ 		if (timeout == 0) {
+ 			printk(KERN_ERR "cpu1 power enable failed");
+-			spin_unlock(&boot_lock);
++			raw_spin_unlock(&boot_lock);
+ 			return -ETIMEDOUT;
+ 		}
+ 	}
